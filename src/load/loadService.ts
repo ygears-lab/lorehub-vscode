@@ -10,9 +10,11 @@ export class LoadService {
   /**
    * mdをワークスペース上のファイルとして書き出す。
    * 要件どおり、ロードのたびに配置先をユーザーに選ばせる（固定パスへの自動配置はしない）。
+   * targetDirectory は「エクスプローラでフォルダを右クリックした」ようにユーザーが既に
+   * 配置先を指したケース用で、その時だけディレクトリ選択ダイアログを省く。
    */
-  async load(record: MdRecord): Promise<void> {
-    const directory = await this.pickDirectory();
+  async load(record: MdRecord, targetDirectory?: vscode.Uri): Promise<void> {
+    const directory = targetDirectory ?? (await this.pickDirectory());
     if (!directory) {
       return;
     }

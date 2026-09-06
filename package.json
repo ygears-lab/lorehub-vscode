@@ -41,9 +41,21 @@
   },
   "main": "./dist/extension.js",
   "activationEvents": [
+    "onStartupFinished",
     "onUri"
   ],
   "contributes": {
+    "configuration": {
+      "title": "LoreHub",
+      "properties": {
+        "lorehub.statusBar.enabled": {
+          "type": "boolean",
+          "default": false,
+          "scope": "window",
+          "description": "Show a LoreHub item in the status bar. It displays whether you are signed in, and clicking it signs you in or out."
+        }
+      }
+    },
     "commands": [
       {
         "command": "lorehub.login",
@@ -58,12 +70,91 @@
       {
         "command": "lorehub.openMdPanel",
         "title": "Open My md Files",
-        "category": "LoreHub"
+        "category": "LoreHub",
+        "icon": "$(book)"
       },
       {
         "command": "lorehub.loadToProject",
         "title": "Load md into Project",
-        "category": "LoreHub"
+        "category": "LoreHub",
+        "icon": "$(cloud-download)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "lorehub.login",
+          "when": "!lorehub.authenticated"
+        },
+        {
+          "command": "lorehub.logout",
+          "when": "lorehub.authenticated"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "lorehub.openMdPanel",
+          "when": "resourceFilename =~ /^(CLAUDE|AGENTS|SKILL)\\.md$|^\\.cursorrules$/i",
+          "group": "navigation@1"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "lorehub.loadToProject",
+          "when": "explorerResourceIsFolder",
+          "group": "7_modification@1"
+        }
+      ]
+    },
+    "walkthroughs": [
+      {
+        "id": "lorehub.gettingStarted",
+        "title": "Get started with LoreHub",
+        "description": "Sign in, open your cloud-synced library of AI config files, and load one into the project you are working on.",
+        "featuredFor": [
+          "CLAUDE.md",
+          "AGENTS.md",
+          "SKILL.md",
+          ".cursorrules"
+        ],
+        "steps": [
+          {
+            "id": "signIn",
+            "title": "Sign in with GitHub",
+            "description": "Your library lives with your account, not with this machine, so the same md files are waiting on every computer you sign in from.\n[Sign in with GitHub](command:lorehub.login)",
+            "media": {
+              "svg": "media/walkthrough/sign-in.svg",
+              "altText": "Two computers sharing one cloud-synced md library"
+            },
+            "completionEvents": [
+              "onContext:lorehub.authenticated"
+            ]
+          },
+          {
+            "id": "openLibrary",
+            "title": "Open your md library",
+            "description": "Browse, write and organise your CLAUDE.md, AGENTS.md, SKILL.md and .cursorrules files in one panel. Labels keep them findable once the collection grows.\n[Open My md Files](command:lorehub.openMdPanel)",
+            "media": {
+              "svg": "media/walkthrough/library.svg",
+              "altText": "The LoreHub panel: labels, a file list and an editor"
+            },
+            "completionEvents": [
+              "onCommand:lorehub.openMdPanel"
+            ]
+          },
+          {
+            "id": "loadIntoProject",
+            "title": "Load an md into this project",
+            "description": "Pick a file from your library and write it into the folder you choose. Right-clicking a folder in the Explorer loads straight into it.\n[Load md into Project](command:lorehub.loadToProject)",
+            "media": {
+              "svg": "media/walkthrough/load.svg",
+              "altText": "An md file moving from the library into a project folder"
+            },
+            "completionEvents": [
+              "onCommand:lorehub.loadToProject"
+            ]
+          }
+        ]
       }
     ]
   },

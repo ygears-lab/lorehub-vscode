@@ -27,7 +27,21 @@ export function activate(context: vscode.ExtensionContext) {
 
   const statusBar = new LoreHubStatusBar();
   context.subscriptions.push(statusBar);
-  context.subscriptions.push(authService.onDidChangeAuthState((state) => statusBar.render(state)));
+  context.subscriptions.push(
+    authService.onDidChangeAuthState((state) => {
+      statusBar.render(state);
+      setAuthContext(state.status === 'authenticated');
+    }),
+  );
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('lorehub.statusBar.enabled')) {
+        statusBar.refreshVisibility();
+      }
+    }),
+  );
+  // restoreSessionが終わるまで未ログイン扱いにしておく。初期化しないとwhen句が未定義を見る。
+  setAuthContext(false);
 
   registerAuthCommands(context, authService, uriHandler);
 
@@ -38,7 +52,8 @@ export function activate(context: vscode.ExtensionContext) {
     // WebView内は authService を直接見る方針だが、こちらは単発コマンドなので withAuthGuard を使う。
     vscode.commands.registerCommand(
       'lorehub.loadToProject',
-      withAuthGuard(authService, async () => {
+      // エクスプローラのコンテキストメニュー経由なら、右クリックされたフォルダがURIで渡ってくる。
+      withAuthGuard(authService, async (targetDirectory?: vscode.Uri) => {
         const { records } = await mdService.list();
         if (records.length === 0) {
           void vscode.window.showInformationMessage('LoreHub: ロードできるmdがありません');
@@ -53,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
           { title: 'LoreHub: ロードするmdを選択', matchOnDescription: true },
         );
         if (picked) {
-          await loadService.load(picked.record satisfies MdRecord);
+          await loadService.load(picked.record satisfies MdRecord, targetDirectory);
         }
       }),
     ),
@@ -63,3 +78,8 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+/** contributes.menus の when 句と、ウォークスルーのサインイン完了判定が参照するコンテキストキー。 */
+function setAuthContext(authenticated: boolean): void {
+  void vscode.commands.executeCommand('setContext', 'lorehub.authenticated', authenticated);
+}
