@@ -164,7 +164,13 @@ external_url = "http://localhost:54321/auth/v1"
 
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 #additional_redirect_urls = ["https://127.0.0.1:3000"]
-additional_redirect_urls = ["vscode://YGears.lorehub-vscode/auth-callback"]
+# 拡張IDの publisher 部分は、F5の開発ホストでは package.json の宣言どおり "YGears" だが、
+# VSIXからインストールすると "ygears" に正規化される。リダイレクトURLの照合は完全一致なので、
+# どちらの経路で検証しても通るよう両方を登録する。本番側(ダッシュボード)も同様にすること。
+additional_redirect_urls = [
+  "vscode://YGears.lorehub-vscode/auth-callback",
+  "vscode://ygears.lorehub-vscode/auth-callback",
+]
 
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
