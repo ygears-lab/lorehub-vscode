@@ -194,19 +194,36 @@ function renderLabelNav(): HTMLElement {
   }
   nav.appendChild(list);
 
+  const status = renderFilterStatus();
+  if (status) {
+    nav.appendChild(status);
+  }
   nav.appendChild(renderLabelAdder());
   return nav;
+}
+
+/** 選択状態を色の違いだけに頼らせない。チェック欄を常に確保しておくことで、
+ * 「ここは押すとON/OFFが切り替わる欄で、複数選べる」ことを押す前に伝える。 */
+function renderCheckMark(checked: boolean): HTMLElement {
+  const check = document.createElement('span');
+  check.className = 'label-nav-check';
+  check.textContent = checked ? '✓' : '';
+  return check;
 }
 
 function renderLabelNavAllRow(): HTMLElement {
   const row = document.createElement('div');
   row.className = 'label-nav-row';
 
+  const active = activeLabelFilter.size === 0;
+
   const item = document.createElement('button');
   item.className = 'label-nav-item';
-  if (activeLabelFilter.size === 0) {
+  item.setAttribute('aria-pressed', String(active));
+  if (active) {
     item.classList.add('active');
   }
+  item.title = '絞り込みを解除してすべて表示';
   item.addEventListener('click', () => {
     activeLabelFilter = new Set();
     render();
@@ -220,21 +237,53 @@ function renderLabelNavAllRow(): HTMLElement {
   count.className = 'label-nav-count';
   count.textContent = String(records.length);
 
-  item.append(name, count);
+  item.append(renderCheckMark(active), name, count);
   row.appendChild(item);
   return row;
+}
+
+/** 絞り込み中だけ出す状態表示。複数選択がOR条件であることは見ただけでは分からないので、
+ * 2件以上のときに明示し、あわせて解除の導線を置く。 */
+function renderFilterStatus(): HTMLElement | null {
+  if (activeLabelFilter.size === 0) {
+    return null;
+  }
+
+  const status = document.createElement('div');
+  status.className = 'filter-status';
+
+  if (activeLabelFilter.size >= 2) {
+    const summary = document.createElement('span');
+    summary.className = 'filter-status-summary';
+    summary.textContent = `${activeLabelFilter.size}件のラベルのいずれか`;
+    status.appendChild(summary);
+  }
+
+  const clear = document.createElement('button');
+  clear.className = 'text-button';
+  clear.textContent = '絞り込みを解除';
+  clear.addEventListener('click', () => {
+    activeLabelFilter = new Set();
+    render();
+  });
+  status.appendChild(clear);
+
+  return status;
 }
 
 function renderLabelNavRow(label: LabelRecord): HTMLElement {
   const row = document.createElement('div');
   row.className = 'label-nav-row';
 
+  const active = activeLabelFilter.has(label.id);
+
   const item = document.createElement('button');
   item.className = 'label-nav-item';
-  if (activeLabelFilter.has(label.id)) {
+  item.setAttribute('aria-pressed', String(active));
+  if (active) {
     item.classList.add('active');
   }
-  item.title = `${label.name} で絞り込み`;
+  item.title = active ? `${label.name} の絞り込みを外す` : `${label.name} で絞り込む`;
   item.addEventListener('click', () => {
     if (activeLabelFilter.has(label.id)) {
       activeLabelFilter.delete(label.id);
@@ -252,7 +301,7 @@ function renderLabelNavRow(label: LabelRecord): HTMLElement {
   count.className = 'label-nav-count';
   count.textContent = String(labelCount(label.id));
 
-  item.append(name, count);
+  item.append(renderCheckMark(active), name, count);
 
   const actions = document.createElement('div');
   actions.className = 'label-nav-actions';

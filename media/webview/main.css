@@ -176,12 +176,31 @@ textarea:focus {
   background-color: var(--vscode-list-hoverBackground);
 }
 
+/* 選択状態は色だけに頼らない。左のアクセントバーと太字を併用することで、
+ * コントラストの低いテーマやホバーとの区別が付きにくい状況でも判別できる。 */
 .label-nav-item.active {
   background-color: var(--vscode-list-activeSelectionBackground);
   color: var(--vscode-list-activeSelectionForeground);
+  box-shadow: inset 2px 0 0 0 var(--vscode-focusBorder);
+  font-weight: 600;
+}
+
+.label-nav-item.active .label-nav-count {
+  opacity: 0.9;
+}
+
+/* チェック欄は未選択でも幅を確保する。空白のままでも「チェックが入る欄がある」ことが
+ * 分かり、複数選択できるトグルだと押す前に伝わる。 */
+.label-nav-check {
+  flex: none;
+  width: 1em;
+  text-align: center;
+  opacity: 0.9;
 }
 
 .label-nav-name {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -230,6 +249,20 @@ textarea:focus {
 .label-nav-input {
   flex: 1;
   min-width: 0;
+}
+
+.filter-status {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 4px 4px 6px;
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
+.filter-status-summary {
+  font-size: 0.85em;
+  color: var(--vscode-descriptionForeground);
 }
 
 .label-nav-footer {
