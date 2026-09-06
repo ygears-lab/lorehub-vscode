@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" width="480" height="260" role="img" aria-label="The LoreHub panel: a label sidebar, a list of md files, and an editor">
+  <style>
+    .bg { fill: var(--vscode-editor-background, #1f2428); }
+    .panel { fill: var(--vscode-editorWidget-background, #2b3138); stroke: var(--vscode-widget-border, #3d444d); stroke-width: 1.5; }
+    .row { fill: var(--vscode-descriptionForeground, #909dab); }
+    .accent-fill { fill: var(--vscode-textLink-foreground, #6cb6ff); }
+    .sub { fill: var(--vscode-descriptionForeground, #909dab); font: 11px var(--vscode-font-family, sans-serif); }
+  </style>
+  <rect class="bg" width="480" height="260" rx="8"/>
+  <rect class="panel" x="20" y="24" width="440" height="212" rx="6"/>
+
+  <!-- labels column -->
+  <line x1="128" y1="24" x2="128" y2="236" stroke="var(--vscode-widget-border, #3d444d)" stroke-width="1.5"/>
+  <text class="sub" x="42" y="52">Labels</text>
+  <rect class="accent-fill" x="42" y="66" width="10" height="10" rx="5"/>
+  <rect class="row" x="60" y="68" width="46" height="6" rx="3"/>
+  <rect class="row" x="42" y="90" width="10" height="10" rx="5" opacity="0.5"/>
+  <rect class="row" x="60" y="92" width="54" height="6" rx="3" opacity="0.55"/>
+  <rect class="row" x="42" y="114" width="10" height="10" rx="5" opacity="0.5"/>
+  <rect class="row" x="60" y="116" width="38" height="6" rx="3" opacity="0.55"/>
+
+  <!-- list column -->
+  <line x1="252" y1="24" x2="252" y2="236" stroke="var(--vscode-widget-border, #3d444d)" stroke-width="1.5"/>
+  <rect x="136" y="42" width="108" height="26" rx="4" fill="var(--vscode-list-activeSelectionBackground, #39414d)"/>
+  <rect class="row" x="146" y="52" width="72" height="6" rx="3"/>
+  <rect class="row" x="146" y="86" width="86" height="6" rx="3" opacity="0.55"/>
+  <rect class="row" x="146" y="112" width="64" height="6" rx="3" opacity="0.55"/>
+  <rect class="row" x="146" y="138" width="80" height="6" rx="3" opacity="0.55"/>
+  <rect class="row" x="146" y="164" width="58" height="6" rx="3" opacity="0.55"/>
+
+  <!-- editor column -->
+  <rect class="row" x="268" y="48" width="120" height="8" rx="4"/>
+  <rect class="row" x="268" y="76" width="172" height="6" rx="3" opacity="0.45"/>
+  <rect class="row" x="268" y="94" width="150" height="6" rx="3" opacity="0.45"/>
+  <rect class="row" x="268" y="112" width="168" height="6" rx="3" opacity="0.45"/>
+  <rect class="row" x="268" y="130" width="128" height="6" rx="3" opacity="0.45"/>
+  <rect class="row" x="268" y="148" width="160" height="6" rx="3" opacity="0.45"/>
+  <rect class="row" x="268" y="166" width="104" height="6" rx="3" opacity="0.45"/>
+</svg>

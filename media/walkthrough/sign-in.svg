@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" width="480" height="260" role="img" aria-label="Two computers sharing one cloud-synced md library through a GitHub sign-in">
+  <style>
+    .bg { fill: var(--vscode-editor-background, #1f2428); }
+    .panel { fill: var(--vscode-editorWidget-background, #2b3138); stroke: var(--vscode-widget-border, #3d444d); stroke-width: 1.5; }
+    .accent { fill: none; stroke: var(--vscode-textLink-foreground, #6cb6ff); stroke-width: 2; }
+    .accent-fill { fill: var(--vscode-textLink-foreground, #6cb6ff); }
+    .line { fill: var(--vscode-descriptionForeground, #909dab); }
+    .label { fill: var(--vscode-editor-foreground, #d5dbe3); font: 500 13px var(--vscode-font-family, sans-serif); }
+    .sub { fill: var(--vscode-descriptionForeground, #909dab); font: 11px var(--vscode-font-family, sans-serif); }
+  </style>
+  <rect class="bg" width="480" height="260" rx="8"/>
+
+  <!-- cloud -->
+  <path class="accent" d="M196 62c0-15 12-27 27-27 11 0 20 6 24 15 3-2 6-3 10-3 11 0 20 9 20 20 0 1 0 2-.2 3 9 2 15 10 15 19 0 11-9 20-20 20h-72c-13 0-24-11-24-24 0-12 9-22 20-23z"/>
+  <text class="label" x="240" y="112" text-anchor="middle">Your account</text>
+  <text class="sub" x="240" y="130" text-anchor="middle">one library, signed in with GitHub</text>
+
+  <!-- left machine -->
+  <rect class="panel" x="24" y="164" width="152" height="72" rx="6"/>
+  <rect class="line" x="40" y="182" width="76" height="6" rx="3"/>
+  <rect class="line" x="40" y="196" width="110" height="6" rx="3" opacity="0.55"/>
+  <rect class="line" x="40" y="210" width="92" height="6" rx="3" opacity="0.35"/>
+  <text class="sub" x="100" y="252" text-anchor="middle">Laptop</text>
+
+  <!-- right machine -->
+  <rect class="panel" x="304" y="164" width="152" height="72" rx="6"/>
+  <rect class="line" x="320" y="182" width="76" height="6" rx="3"/>
+  <rect class="line" x="320" y="196" width="110" height="6" rx="3" opacity="0.55"/>
+  <rect class="line" x="320" y="210" width="92" height="6" rx="3" opacity="0.35"/>
+  <text class="sub" x="380" y="252" text-anchor="middle">Desktop</text>
+
+  <!-- links -->
+  <path class="accent" d="M188 92 C140 100 108 128 100 160" stroke-dasharray="5 5"/>
+  <path class="accent" d="M292 92 C340 100 372 128 380 160" stroke-dasharray="5 5"/>
+  <circle class="accent-fill" cx="100" cy="160" r="3.5"/>
+  <circle class="accent-fill" cx="380" cy="160" r="3.5"/>
+</svg>

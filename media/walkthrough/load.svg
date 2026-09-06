@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" width="480" height="260" role="img" aria-label="An md file moving from the LoreHub library into a project folder">
+  <style>
+    .bg { fill: var(--vscode-editor-background, #1f2428); }
+    .panel { fill: var(--vscode-editorWidget-background, #2b3138); stroke: var(--vscode-widget-border, #3d444d); stroke-width: 1.5; }
+    .row { fill: var(--vscode-descriptionForeground, #909dab); }
+    .accent { fill: none; stroke: var(--vscode-textLink-foreground, #6cb6ff); stroke-width: 2; }
+    .accent-fill { fill: var(--vscode-textLink-foreground, #6cb6ff); }
+    .sub { fill: var(--vscode-descriptionForeground, #909dab); font: 11px var(--vscode-font-family, sans-serif); }
+  </style>
+  <rect class="bg" width="480" height="260" rx="8"/>
+
+  <!-- library -->
+  <rect class="panel" x="24" y="56" width="150" height="150" rx="6"/>
+  <text class="sub" x="99" y="82" text-anchor="middle">LoreHub</text>
+  <rect class="row" x="42" y="100" width="102" height="7" rx="3.5"/>
+  <rect class="row" x="42" y="120" width="84" height="7" rx="3.5" opacity="0.5"/>
+  <rect class="row" x="42" y="140" width="96" height="7" rx="3.5" opacity="0.5"/>
+  <rect class="row" x="42" y="160" width="72" height="7" rx="3.5" opacity="0.5"/>
+
+  <!-- arrow -->
+  <path class="accent" d="M188 130h84"/>
+  <path class="accent-fill" d="M286 130l-18-8v16z"/>
+  <text class="sub" x="230" y="116" text-anchor="middle">load</text>
+
+  <!-- project folder -->
+  <rect class="panel" x="306" y="56" width="150" height="150" rx="6"/>
+  <path class="accent" d="M330 96v-8a4 4 0 0 1 4-4h14l6 8h28a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4h-48a4 4 0 0 1-4-4z"/>
+  <text class="sub" x="381" y="150" text-anchor="middle">your project</text>
+  <rect class="accent-fill" x="330" y="168" width="102" height="7" rx="3.5"/>
+  <text class="sub" x="381" y="194" text-anchor="middle">CLAUDE.md</text>
+</svg>

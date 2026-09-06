@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>LoreHub</title>
+  <defs>
+    <clipPath id="frontCard">
+      <rect x="38" y="30" width="70" height="84" rx="10"/>
+    </clipPath>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#22272E"/>
+
+  <!-- back card -->
+  <rect x="24" y="18" width="68" height="82" rx="10" fill="#3D4652"/>
+
+  <!-- front card -->
+  <rect x="38" y="30" width="70" height="84" rx="10" fill="#E8EBEF"/>
+
+  <!-- spine -->
+  <g clip-path="url(#frontCard)">
+    <rect x="38" y="30" width="10" height="84" fill="#2DD4BF"/>
+  </g>
+
+  <!-- prompt glyph -->
+  <g fill="none" stroke="#0F766E" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="60,52 74,64 60,76"/>
+    <line x1="82" y1="76" x2="96" y2="76"/>
+  </g>
+
+  <!-- body line -->
+  <line x1="60" y1="94" x2="96" y2="94" stroke="#9AA5B1" stroke-width="6" stroke-linecap="round"/>
+</svg>
