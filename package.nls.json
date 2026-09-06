@@ -1,0 +1,19 @@
+{
+  "extension.description": "Keep your CLAUDE.md, SKILL.md, .cursorrules and AGENTS.md files in one cloud-synced library, organize them with labels, and load them into any project without leaving VS Code.",
+  "configuration.statusBar.enabled.description": "Show a LoreHub item in the status bar. It displays whether you are signed in, and clicking it signs you in or out.",
+  "command.login.title": "Login with GitHub",
+  "command.logout.title": "Logout",
+  "command.openMdPanel.title": "Open My Library",
+  "command.loadToProject.title": "Load md into Project",
+  "walkthrough.title": "Get started with LoreHub",
+  "walkthrough.description": "Sign in, open your cloud-synced library of AI config files, and load one into the project you are working on.",
+  "walkthrough.signIn.title": "Sign in with GitHub",
+  "walkthrough.signIn.description": "Your library lives with your account, not with this machine, so the same md files are waiting on every computer you sign in from.\n[Sign in with GitHub](command:lorehub.login)",
+  "walkthrough.signIn.altText": "Two computers sharing one cloud-synced md library",
+  "walkthrough.openLibrary.title": "Open your md library",
+  "walkthrough.openLibrary.description": "Browse, write and organise your CLAUDE.md, AGENTS.md, SKILL.md and .cursorrules files in one panel. Labels keep them findable once the collection grows.\n[Open My Library](command:lorehub.openMdPanel)",
+  "walkthrough.openLibrary.altText": "The LoreHub panel: labels, a file list and an editor",
+  "walkthrough.loadIntoProject.title": "Load an md into this project",
+  "walkthrough.loadIntoProject.description": "Pick a file from your library and write it into the folder you choose. Right-clicking a folder in the Explorer loads straight into it.\n[Load md into Project](command:lorehub.loadToProject)",
+  "walkthrough.loadIntoProject.altText": "An md file moving from the library into a project folder"
+}

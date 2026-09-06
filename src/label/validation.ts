@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 /** ラベル名が不正な場合のエラー（空文字・重複）。 */
 export class LabelValidationError extends Error {}
 
@@ -7,7 +9,7 @@ export class LabelNetworkError extends Error {}
 export function assertNonBlankName(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) {
-    throw new LabelValidationError('ラベル名を入力してください');
+    throw new LabelValidationError(vscode.l10n.t('Enter a label name'));
   }
   return trimmed;
 }

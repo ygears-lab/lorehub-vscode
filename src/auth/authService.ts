@@ -77,11 +77,12 @@ export class AuthService implements vscode.Disposable {
   }
 
   private async notifySessionExpired(): Promise<void> {
+    const login = vscode.l10n.t('Login');
     const choice = await vscode.window.showWarningMessage(
-      'LoreHub: セッションが失効しました。再度ログインしてください',
-      'ログイン',
+      vscode.l10n.t('LoreHub: Your session has expired. Please log in again'),
+      login,
     );
-    if (choice === 'ログイン') {
+    if (choice === login) {
       await this.login();
     }
   }
@@ -131,7 +132,7 @@ export class AuthService implements vscode.Disposable {
         options: { redirectTo, skipBrowserRedirect: true },
       });
       if (error || !data.url) {
-        throw new Error(error?.message ?? '認可URLの取得に失敗しました');
+        throw new Error(error?.message ?? vscode.l10n.t('Failed to obtain the authorization URL'));
       }
 
       await vscode.env.openExternal(vscode.Uri.parse(data.url));
@@ -139,7 +140,7 @@ export class AuthService implements vscode.Disposable {
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: 'LoreHub: ブラウザでGitHub認証を完了してください…',
+          title: vscode.l10n.t('LoreHub: Complete the GitHub sign-in in your browser…'),
           cancellable: true,
         },
         async (_progress, cancellationToken) => {
@@ -156,14 +157,14 @@ export class AuthService implements vscode.Disposable {
             throw new LoginProviderError(callback.errorDescription ?? callback.error);
           }
           if (!callback.code) {
-            throw new Error('認可コードを受信できませんでした');
+            throw new Error(vscode.l10n.t('No authorization code was received'));
           }
 
           const { data: sessionData, error: exchangeError } = await this.supabase.auth.exchangeCodeForSession(
             callback.code,
           );
           if (exchangeError || !sessionData.session) {
-            throw new Error(exchangeError?.message ?? 'セッションの確立に失敗しました');
+            throw new Error(exchangeError?.message ?? vscode.l10n.t('Failed to establish the session'));
           }
 
           this.setState('authenticated', sessionData.session);
@@ -171,7 +172,9 @@ export class AuthService implements vscode.Disposable {
             (sessionData.session.user.user_metadata?.user_name as string | undefined) ??
             sessionData.session.user.email ??
             '';
-          vscode.window.showInformationMessage(`LoreHub: ログインしました${name ? ` (${name})` : ''}`);
+          vscode.window.showInformationMessage(
+            name ? vscode.l10n.t('LoreHub: Logged in ({0})', name) : vscode.l10n.t('LoreHub: Logged in'),
+          );
         },
       );
     } catch (err) {
@@ -189,12 +192,13 @@ export class AuthService implements vscode.Disposable {
     }
     const message =
       err instanceof LoginTimeoutError
-        ? 'LoreHub: ログインがタイムアウトしました'
+        ? vscode.l10n.t('LoreHub: Login timed out')
         : err instanceof LoginProviderError
-          ? `LoreHub: ログインが拒否されました (${err.message})`
-          : `LoreHub: ログインに失敗しました (${err instanceof Error ? err.message : String(err)})`;
-    const choice = await vscode.window.showErrorMessage(message, '再試行');
-    if (choice === '再試行') {
+          ? vscode.l10n.t('LoreHub: Login was rejected ({0})', err.message)
+          : vscode.l10n.t('LoreHub: Login failed ({0})', err instanceof Error ? err.message : String(err));
+    const retry = vscode.l10n.t('Retry');
+    const choice = await vscode.window.showErrorMessage(message, retry);
+    if (choice === retry) {
       await this.login();
     }
   }
@@ -211,7 +215,7 @@ export class AuthService implements vscode.Disposable {
     // ラベル名もユーザーが作ったデータなので、md本体と同じくログアウト時に必ず消す。
     await this.context.globalState.update(LABEL_CACHE_KEY, undefined);
     this.setState('unauthenticated', null);
-    vscode.window.showInformationMessage('LoreHub: ログアウトしました');
+    vscode.window.showInformationMessage(vscode.l10n.t('LoreHub: Logged out'));
   }
 
   dispose(): void {

@@ -25,6 +25,14 @@
 # WebViewが読み込む静的アセット
 !media/**
 
+# 表示言語ごとの文言。package.nls.json が既定(英語)で、
+# package.nls.<locale>.json が contributes の %key% を、
+# l10n/bundle.l10n.<locale>.json が vscode.l10n.t() をそれぞれ差し替える。
+# 入れ忘れると英語のままになるだけでエラーにならないため、追加時は `npx @vscode/vsce ls` で確認する。
+!package.nls.json
+!package.nls.*.json
+!l10n/**
+
 # Marketplace掲載ページ用
 !package.json
 !README.md

@@ -30,7 +30,7 @@ export class LoadService {
 
     if (existing) {
       if (Buffer.from(existing).equals(content)) {
-        void vscode.window.showInformationMessage(`LoreHub: 「${filename}」は既に最新の内容です`);
+        void vscode.window.showInformationMessage(vscode.l10n.t('LoreHub: "{0}" is already up to date', filename));
         return;
       }
       if (!(await this.confirmOverwrite(record, filename, targetUri))) {
@@ -40,11 +40,12 @@ export class LoadService {
 
     await vscode.workspace.fs.writeFile(targetUri, content);
 
+    const open = vscode.l10n.t('Open');
     const choice = await vscode.window.showInformationMessage(
-      `LoreHub: 「${filename}」をロードしました`,
-      '開く',
+      vscode.l10n.t('LoreHub: Loaded "{0}"', filename),
+      open,
     );
-    if (choice === '開く') {
+    if (choice === open) {
       await vscode.window.showTextDocument(targetUri);
     }
   }
@@ -55,8 +56,8 @@ export class LoadService {
       canSelectFolders: true,
       canSelectMany: false,
       defaultUri: vscode.workspace.workspaceFolders?.[0]?.uri,
-      openLabel: 'ここにロード',
-      title: 'LoreHub: ロード先のディレクトリを選択',
+      openLabel: vscode.l10n.t('Load here'),
+      title: vscode.l10n.t('LoreHub: Select the destination directory'),
     });
     return uris?.[0];
   }
@@ -64,18 +65,18 @@ export class LoadService {
   private async pickFilename(record: MdRecord): Promise<string | undefined> {
     const suggestion = sanitizeFilename(record.filename || record.title || LOAD_DEFAULT_FILENAME);
     const input = await vscode.window.showInputBox({
-      title: 'LoreHub: ロードするファイル名',
+      title: vscode.l10n.t('LoreHub: File name to load as'),
       value: suggestion,
-      prompt: '選択したディレクトリ直下に、この名前で書き出します',
+      prompt: vscode.l10n.t('The file is written directly under the selected directory with this name'),
       validateInput: (value) => {
         const trimmed = value.trim();
         if (!trimmed) {
-          return 'ファイル名を入力してください';
+          return vscode.l10n.t('Enter a file name');
         }
         // サニタイズで変化する入力は、パス区切りや禁止文字を含んでいるということなので確定させない。
         return sanitizeFilename(trimmed) === trimmed
           ? undefined
-          : `この名前は使えません。例: ${sanitizeFilename(trimmed)}`;
+          : vscode.l10n.t('This name cannot be used. For example: {0}', sanitizeFilename(trimmed));
       },
     });
     return input?.trim() || undefined;
@@ -92,12 +93,13 @@ export class LoadService {
       { preview: true },
     );
 
+    const overwrite = vscode.l10n.t('Overwrite');
     const choice = await vscode.window.showWarningMessage(
-      `LoreHub: 「${filename}」は既に存在します。差分を確認して上書きしますか?`,
+      vscode.l10n.t('LoreHub: "{0}" already exists. Review the diff and overwrite?', filename),
       { modal: true },
-      '上書きする',
+      overwrite,
     );
-    return choice === '上書きする';
+    return choice === overwrite;
   }
 }
 
@@ -111,7 +113,9 @@ async function readIfExists(uri: vscode.Uri): Promise<Uint8Array | undefined> {
     return undefined;
   }
   if (stat.type === vscode.FileType.Directory) {
-    throw new LoadValidationError('同名のディレクトリが既に存在するため、ロードできません');
+    throw new LoadValidationError(
+      vscode.l10n.t('A directory with the same name already exists, so it cannot be loaded'),
+    );
   }
   return vscode.workspace.fs.readFile(uri);
 }

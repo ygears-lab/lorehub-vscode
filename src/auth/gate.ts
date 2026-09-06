@@ -7,8 +7,12 @@ export function withAuthGuard<T extends unknown[]>(
 ): (...args: T) => Promise<unknown> {
   return async (...args: T) => {
     if (!auth.isAuthenticated()) {
-      const choice = await vscode.window.showWarningMessage('LoreHub: この操作にはログインが必要です', 'ログイン');
-      if (choice === 'ログイン') {
+      const login = vscode.l10n.t('Login');
+      const choice = await vscode.window.showWarningMessage(
+        vscode.l10n.t('LoreHub: You need to be logged in for this action'),
+        login,
+      );
+      if (choice === login) {
         await vscode.commands.executeCommand('lorehub.login');
       }
       return;

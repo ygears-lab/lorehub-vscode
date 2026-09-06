@@ -144,9 +144,9 @@ export class LabelService {
 
   private toCreateError(error: { code?: string; message: string } | null, name: string): Error {
     if (error?.code === UNIQUE_VIOLATION) {
-      return new LabelValidationError(`ラベル「${name}」は既に存在します`);
+      return new LabelValidationError(vscode.l10n.t('The label "{0}" already exists', name));
     }
-    return toServiceError(error?.message ?? 'ラベルの保存に失敗しました');
+    return toServiceError(error?.message ?? vscode.l10n.t('Failed to save the label'));
   }
 
   private currentUserId(): string | undefined {

@@ -113,7 +113,7 @@ export class MdService {
       throw toServiceError(error.message);
     }
     if (!data) {
-      throw new MdValidationError('対象のmdが見つかりません');
+      throw new MdValidationError(vscode.l10n.t('The requested md was not found'));
     }
 
     const labelMap = await this.labelService.listLabelIdsForMdIds([id]);
@@ -124,7 +124,7 @@ export class MdService {
     assertWithinSizeLimit(Buffer.byteLength(input.content, 'utf8'));
     const { data, error } = await this.supabase.from('md').insert(input).select().single();
     if (error || !data) {
-      throw toServiceError(error?.message ?? 'mdの作成に失敗しました');
+      throw toServiceError(error?.message ?? vscode.l10n.t('Failed to create the md'));
     }
     return toRecord(data as MdRow);
   }
@@ -138,7 +138,7 @@ export class MdService {
     }
     const { data, error } = await this.supabase.from('md').update(patch).eq('id', id).select().single();
     if (error || !data) {
-      throw toServiceError(error?.message ?? 'mdの更新に失敗しました');
+      throw toServiceError(error?.message ?? vscode.l10n.t('Failed to update the md'));
     }
     const labelMap = await this.labelService.listLabelIdsForMdIds([id]);
     return toRecord(data as MdRow, labelMap.get(id) ?? []);
@@ -154,7 +154,7 @@ export class MdService {
   async importFromFile(uri: vscode.Uri): Promise<MdRecord> {
     const bytes = await vscode.workspace.fs.readFile(uri);
     if (isBinaryContent(bytes)) {
-      throw new MdValidationError('バイナリファイルはインポートできません');
+      throw new MdValidationError(vscode.l10n.t('Binary files cannot be imported'));
     }
     assertWithinSizeLimit(bytes.byteLength);
     const content = decodeUtf8Strict(bytes);

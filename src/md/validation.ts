@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import * as vscode from 'vscode';
 import { MD_CONTENT_SIZE_LIMIT_BYTES } from './constants';
 
 /** インポート/保存内容がバリデーションに違反した場合のエラー（サイズ超過・バイナリ・非UTF-8）。 */
@@ -23,7 +24,7 @@ export function isBinaryContent(bytes: Uint8Array): boolean {
 export function assertWithinSizeLimit(byteLength: number): void {
   if (byteLength > MD_CONTENT_SIZE_LIMIT_BYTES) {
     throw new MdValidationError(
-      `ファイルサイズが上限(1MB)を超えています (${byteLength.toLocaleString('ja-JP')}バイト)`,
+      vscode.l10n.t('The file exceeds the 1MB size limit ({0} bytes)', byteLength.toLocaleString(vscode.env.language)),
     );
   }
 }
@@ -33,7 +34,7 @@ export function decodeUtf8Strict(bytes: Uint8Array): string {
   try {
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
-    throw new MdValidationError('UTF-8以外の文字コードのファイルはインポートできません');
+    throw new MdValidationError(vscode.l10n.t('Files that are not UTF-8 encoded cannot be imported'));
   }
 }
 

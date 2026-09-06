@@ -17,19 +17,21 @@ export class LoreHubStatusBar implements vscode.Disposable {
         const name =
           (state.user?.user_metadata?.user_name as string | undefined) ?? state.user?.email ?? '';
         this.item.text = '$(account) LoreHub';
-        this.item.tooltip = name ? `${name} でログイン中。クリックでログアウト` : 'クリックでログアウト';
+        this.item.tooltip = name
+          ? vscode.l10n.t('Logged in as {0}. Click to log out', name)
+          : vscode.l10n.t('Click to log out');
         this.item.command = 'lorehub.logout';
         break;
       }
       case 'authenticating':
         this.item.text = '$(sync~spin) LoreHub';
-        this.item.tooltip = 'ログイン中…';
+        this.item.tooltip = vscode.l10n.t('Logging in…');
         this.item.command = undefined;
         break;
       case 'unauthenticated':
       default:
         this.item.text = '$(sign-in) LoreHub';
-        this.item.tooltip = '未ログイン。クリックでログイン';
+        this.item.tooltip = vscode.l10n.t('Not logged in. Click to log in');
         this.item.command = 'lorehub.login';
         break;
     }

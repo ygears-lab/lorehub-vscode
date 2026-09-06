@@ -56,16 +56,16 @@ export function activate(context: vscode.ExtensionContext) {
       withAuthGuard(authService, async (targetDirectory?: vscode.Uri) => {
         const { records } = await mdService.list();
         if (records.length === 0) {
-          void vscode.window.showInformationMessage('LoreHub: ロードできるmdがありません');
+          void vscode.window.showInformationMessage(vscode.l10n.t('LoreHub: There is no md to load'));
           return;
         }
         const picked = await vscode.window.showQuickPick(
           records.map((record) => ({
-            label: record.title || record.filename || '(無題)',
-            description: new Date(record.updatedAt).toLocaleString('ja-JP'),
+            label: record.title || record.filename || vscode.l10n.t('(untitled)'),
+            description: new Date(record.updatedAt).toLocaleString(vscode.env.language),
             record,
           })),
-          { title: 'LoreHub: ロードするmdを選択', matchOnDescription: true },
+          { title: vscode.l10n.t('LoreHub: Select an md to load'), matchOnDescription: true },
         );
         if (picked) {
           await loadService.load(picked.record satisfies MdRecord, targetDirectory);

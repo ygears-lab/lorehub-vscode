@@ -1,6 +1,7 @@
 import type { HostToWebviewMessage, WebviewToHostMessage } from './protocol';
 import type { LabelRecord } from '../label/types';
 import type { MdListPayload, MdRecord } from '../md/types';
+import { compareNames, initL10n, relativeTime, t, type L10nPayload } from './l10n';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: WebviewToHostMessage): void;
@@ -36,9 +37,24 @@ let pendingFocusKey: string | null = null;
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  throw new Error('LoreHub: #root要素が見つかりません');
+  throw new Error('LoreHub: the #root element was not found');
 }
 const root: HTMLElement = rootElement;
+
+// 文言はホスト側(html.ts)が data-l10n に埋め込んでいる。最初の描画より前に読み込む。
+initL10n(parseL10nPayload(root.dataset.l10n));
+
+function parseL10nPayload(raw: string | undefined): L10nPayload | null {
+  if (!raw) {
+    return null;
+  }
+  try {
+    return JSON.parse(raw) as L10nPayload;
+  } catch {
+    // 辞書が壊れていても画面自体は英語で使えるようにする。
+    return null;
+  }
+}
 
 function post(message: WebviewToHostMessage): void {
   vscodeApi.postMessage(message);
@@ -81,7 +97,7 @@ function renderErrorBanner(): HTMLElement {
   banner.append(errorMessage ?? '');
 
   const dismiss = document.createElement('button');
-  dismiss.textContent = '閉じる';
+  dismiss.textContent = t('Dismiss');
   dismiss.addEventListener('click', () => {
     errorMessage = null;
     render();
@@ -96,11 +112,12 @@ function renderLoginView(): HTMLElement {
   container.className = 'login-view';
 
   const message = document.createElement('p');
-  message.textContent = authState === 'authenticating' ? 'ログイン処理中…' : 'LoreHubを使うにはログインが必要です';
+  message.textContent =
+    authState === 'authenticating' ? t('Signing in…') : t('Sign in to start using LoreHub');
   container.appendChild(message);
 
   const button = document.createElement('button');
-  button.textContent = 'GitHubでログイン';
+  button.textContent = t('Sign in with GitHub');
   button.disabled = authState === 'authenticating';
   button.addEventListener('click', () => post({ type: 'openLogin' }));
   container.appendChild(button);
@@ -128,10 +145,10 @@ function renderManagementView(): HTMLElement {
 function renderOfflineBanner(): HTMLElement {
   const banner = document.createElement('div');
   banner.className = 'offline-banner';
-  banner.append('オフラインです。表示中のデータはキャッシュです。');
+  banner.append(t('You are offline. The data shown comes from the cache.'));
 
   const retry = document.createElement('button');
-  retry.textContent = '再試行';
+  retry.textContent = t('Retry');
   retry.addEventListener('click', () => post({ type: 'retryOnline' }));
   banner.appendChild(retry);
 
@@ -143,13 +160,13 @@ function renderToolbar(): HTMLElement {
   toolbar.className = 'toolbar';
 
   const newButton = document.createElement('button');
-  newButton.textContent = '新規作成';
-  newButton.title = '新規作成';
+  newButton.textContent = t('New');
+  newButton.title = t('Create a new md');
   newButton.disabled = offline;
   newButton.addEventListener('click', onNew);
 
   const importButton = document.createElement('button');
-  importButton.textContent = 'インポート';
+  importButton.textContent = t('Import');
   importButton.disabled = offline;
   importButton.addEventListener('click', () => post({ type: 'importLocalFile', requestId: newRequestId() }));
 
@@ -176,7 +193,7 @@ function renderLabelNav(): HTMLElement {
 
   const heading = document.createElement('div');
   heading.className = 'pane-heading';
-  heading.textContent = 'ラベル';
+  heading.textContent = t('Labels');
   nav.appendChild(heading);
 
   const list = document.createElement('div');
@@ -189,7 +206,7 @@ function renderLabelNav(): HTMLElement {
   if (labels.length === 0) {
     const hint = document.createElement('div');
     hint.className = 'pane-hint';
-    hint.textContent = 'ラベルはまだありません';
+    hint.textContent = t('No labels yet');
     list.appendChild(hint);
   }
   nav.appendChild(list);
@@ -223,7 +240,7 @@ function renderLabelNavAllRow(): HTMLElement {
   if (active) {
     item.classList.add('active');
   }
-  item.title = '絞り込みを解除してすべて表示';
+  item.title = t('Clear the filter and show everything');
   item.addEventListener('click', () => {
     activeLabelFilter = new Set();
     render();
@@ -231,7 +248,7 @@ function renderLabelNavAllRow(): HTMLElement {
 
   const name = document.createElement('span');
   name.className = 'label-nav-name';
-  name.textContent = 'すべて';
+  name.textContent = t('All');
 
   const count = document.createElement('span');
   count.className = 'label-nav-count';
@@ -255,13 +272,13 @@ function renderFilterStatus(): HTMLElement | null {
   if (activeLabelFilter.size >= 2) {
     const summary = document.createElement('span');
     summary.className = 'filter-status-summary';
-    summary.textContent = `${activeLabelFilter.size}件のラベルのいずれか`;
+    summary.textContent = t('Any of {0} labels', activeLabelFilter.size);
     status.appendChild(summary);
   }
 
   const clear = document.createElement('button');
   clear.className = 'text-button';
-  clear.textContent = '絞り込みを解除';
+  clear.textContent = t('Clear filter');
   clear.addEventListener('click', () => {
     activeLabelFilter = new Set();
     render();
@@ -283,7 +300,7 @@ function renderLabelNavRow(label: LabelRecord): HTMLElement {
   if (active) {
     item.classList.add('active');
   }
-  item.title = active ? `${label.name} の絞り込みを外す` : `${label.name} で絞り込む`;
+  item.title = active ? t('Stop filtering by {0}', label.name) : t('Filter by {0}', label.name);
   item.addEventListener('click', () => {
     if (activeLabelFilter.has(label.id)) {
       activeLabelFilter.delete(label.id);
@@ -309,7 +326,7 @@ function renderLabelNavRow(label: LabelRecord): HTMLElement {
   const rename = document.createElement('button');
   rename.className = 'icon-button';
   rename.textContent = '✎';
-  rename.title = 'ラベル名を変更';
+  rename.title = t('Rename the label');
   rename.disabled = offline;
   rename.addEventListener('click', () => {
     renamingLabelId = label.id;
@@ -321,7 +338,7 @@ function renderLabelNavRow(label: LabelRecord): HTMLElement {
   const remove = document.createElement('button');
   remove.className = 'icon-button';
   remove.textContent = '✕';
-  remove.title = 'ラベルを削除';
+  remove.title = t('Delete the label');
   remove.disabled = offline;
   remove.addEventListener('click', () => {
     post({ type: 'deleteLabel', requestId: newRequestId(), id: label.id, name: label.name });
@@ -358,14 +375,14 @@ function renderLabelRenameRow(label: LabelRecord): HTMLElement {
   const confirm = document.createElement('button');
   confirm.className = 'icon-button';
   confirm.textContent = '✓';
-  confirm.title = '変更を確定';
+  confirm.title = t('Apply the change');
   confirm.disabled = offline;
   confirm.addEventListener('click', commit);
 
   const cancel = document.createElement('button');
   cancel.className = 'icon-button';
   cancel.textContent = '✕';
-  cancel.title = 'キャンセル';
+  cancel.title = t('Cancel');
   cancel.addEventListener('click', () => {
     renamingLabelId = null;
     render();
@@ -382,7 +399,7 @@ function renderLabelAdder(): HTMLElement {
   if (!labelAdderOpen) {
     const open = document.createElement('button');
     open.className = 'text-button';
-    open.textContent = '＋ ラベル追加';
+    open.textContent = t('+ Add label');
     open.disabled = offline;
     open.addEventListener('click', () => {
       labelAdderOpen = true;
@@ -396,7 +413,7 @@ function renderLabelAdder(): HTMLElement {
   const input = document.createElement('input');
   input.className = 'label-nav-input';
   input.dataset.focusKey = 'label-add';
-  input.placeholder = '新しいラベル名';
+  input.placeholder = t('New label name');
   input.value = newLabelDraft;
   input.disabled = offline;
   input.addEventListener('input', () => {
@@ -419,14 +436,14 @@ function renderLabelAdder(): HTMLElement {
   const add = document.createElement('button');
   add.className = 'icon-button';
   add.textContent = '✓';
-  add.title = '追加';
+  add.title = t('Add');
   add.disabled = offline;
   add.addEventListener('click', commit);
 
   const cancel = document.createElement('button');
   cancel.className = 'icon-button';
   cancel.textContent = '✕';
-  cancel.title = 'キャンセル';
+  cancel.title = t('Cancel');
   cancel.addEventListener('click', () => {
     labelAdderOpen = false;
     newLabelDraft = '';
@@ -457,7 +474,8 @@ function visibleRecords(): MdRecord[] {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
-/** ISO日時を「3日前」のような相対表示にする。一覧の1行に収める前提で粒度は粗くてよい。 */
+/** ISO日時を「3日前」のような相対表示にする。一覧の1行に収める前提で粒度は粗くてよい。
+ * 単位ごとの言い回しと複数形はIntlに任せるので、ここに翻訳対象の文字列は持たない。 */
 function formatRelativeTime(iso: string): string {
   const then = Date.parse(iso);
   if (Number.isNaN(then)) {
@@ -465,26 +483,26 @@ function formatRelativeTime(iso: string): string {
   }
   const minutes = Math.floor((Date.now() - then) / 60000);
   if (minutes < 1) {
-    return 'たった今';
+    return relativeTime(0, 'second');
   }
   if (minutes < 60) {
-    return `${minutes}分前`;
+    return relativeTime(-minutes, 'minute');
   }
   const hours = Math.floor(minutes / 60);
   if (hours < 24) {
-    return `${hours}時間前`;
+    return relativeTime(-hours, 'hour');
   }
   const days = Math.floor(hours / 24);
   if (days < 7) {
-    return `${days}日前`;
+    return relativeTime(-days, 'day');
   }
   if (days < 30) {
-    return `${Math.floor(days / 7)}週間前`;
+    return relativeTime(-Math.floor(days / 7), 'week');
   }
   if (days < 365) {
-    return `${Math.floor(days / 30)}か月前`;
+    return relativeTime(-Math.floor(days / 30), 'month');
   }
-  return `${Math.floor(days / 365)}年前`;
+  return relativeTime(-Math.floor(days / 365), 'year');
 }
 
 function renderListPane(): HTMLElement {
@@ -497,7 +515,7 @@ function renderListPane(): HTMLElement {
   const search = document.createElement('input');
   search.className = 'search-input';
   search.dataset.focusKey = 'search';
-  search.placeholder = '検索 (/)';
+  search.placeholder = t('Search (/)');
   search.value = searchQuery;
   search.addEventListener('input', () => {
     searchQuery = search.value;
@@ -511,7 +529,10 @@ function renderListPane(): HTMLElement {
   const footer = document.createElement('div');
   footer.className = 'list-footer';
   const shown = visibleRecords().length;
-  footer.textContent = shown === records.length ? `${records.length} 件` : `${shown} / ${records.length} 件`;
+  footer.textContent =
+    shown === records.length
+      ? t('{0} items', records.length)
+      : t('{0} / {1} items', shown, records.length);
   pane.appendChild(footer);
 
   return pane;
@@ -525,7 +546,7 @@ function renderList(): HTMLElement {
   if (visible.length === 0) {
     const empty = document.createElement('li');
     empty.className = 'md-list-empty';
-    empty.textContent = records.length === 0 ? 'mdがまだありません' : '該当するmdがありません';
+    empty.textContent = records.length === 0 ? t('No md files yet') : t('No md files match');
     list.appendChild(empty);
     return list;
   }
@@ -538,7 +559,7 @@ function renderList(): HTMLElement {
 
     const title = document.createElement('span');
     title.className = 'md-list-title';
-    title.textContent = record.title || record.filename || '(無題)';
+    title.textContent = record.title || record.filename || t('(untitled)');
 
     const time = document.createElement('span');
     time.className = 'md-list-time';
@@ -614,7 +635,7 @@ function renderEditor(): HTMLElement {
   if (!draft) {
     const empty = document.createElement('p');
     empty.className = 'pane-hint';
-    empty.textContent = '左のリストから選択するか、新規作成してください';
+    empty.textContent = t('Select an md from the list, or create a new one');
     container.appendChild(empty);
     return container;
   }
@@ -623,7 +644,7 @@ function renderEditor(): HTMLElement {
 
   const titleInput = document.createElement('input');
   titleInput.className = 'title-input';
-  titleInput.placeholder = 'タイトル';
+  titleInput.placeholder = t('Title');
   titleInput.value = currentDraft.title;
   titleInput.addEventListener('input', () => {
     currentDraft.title = titleInput.value;
@@ -632,7 +653,7 @@ function renderEditor(): HTMLElement {
 
   const filenameInput = document.createElement('input');
   filenameInput.className = 'filename-input';
-  filenameInput.placeholder = 'ファイル名';
+  filenameInput.placeholder = t('File name');
   filenameInput.value = currentDraft.filename;
   filenameInput.addEventListener('input', () => {
     currentDraft.filename = filenameInput.value;
@@ -656,7 +677,7 @@ function renderEditor(): HTMLElement {
   } else {
     const hint = document.createElement('span');
     hint.className = 'pane-hint';
-    hint.textContent = '保存後にラベルを付与できます';
+    hint.textContent = t('You can attach labels once it is saved');
     container.appendChild(hint);
   }
 
@@ -744,7 +765,7 @@ function renderLabelPicker(record: MdRecord): HTMLElement {
 
   const caption = document.createElement('span');
   caption.className = 'pane-hint';
-  caption.textContent = 'ラベル:';
+  caption.textContent = t('Labels:');
   picker.appendChild(caption);
 
   // labelsは名前順に整列済みなので、付与済みチップも常に同じ並びになる。
@@ -752,7 +773,7 @@ function renderLabelPicker(record: MdRecord): HTMLElement {
   if (assigned.length === 0) {
     const none = document.createElement('span');
     none.className = 'pane-hint';
-    none.textContent = '未設定';
+    none.textContent = t('None');
     picker.appendChild(none);
   }
 
@@ -764,7 +785,7 @@ function renderLabelPicker(record: MdRecord): HTMLElement {
     const remove = document.createElement('button');
     remove.className = 'chip-remove';
     remove.textContent = '✕';
-    remove.title = `${label.name} を外す`;
+    remove.title = t('Remove {0}', label.name);
     remove.disabled = offline;
     remove.addEventListener('click', () => toggleLabel(record, label));
 
@@ -774,8 +795,8 @@ function renderLabelPicker(record: MdRecord): HTMLElement {
 
   const add = document.createElement('button');
   add.className = 'chip-add';
-  add.textContent = '＋ ラベル';
-  add.title = 'ラベルを付ける';
+  add.textContent = t('+ Label');
+  add.title = t('Attach a label');
   add.disabled = offline;
   add.addEventListener('click', () => {
     if (labelPickerOpen) {
@@ -804,7 +825,7 @@ function renderLabelPopover(record: MdRecord): HTMLElement {
   const input = document.createElement('input');
   input.className = 'label-popover-input';
   input.dataset.focusKey = 'label-picker';
-  input.placeholder = '絞り込み / 新しいラベル名';
+  input.placeholder = t('Filter or new label name');
   input.value = labelPickerQuery;
   input.addEventListener('input', () => {
     labelPickerQuery = input.value;
@@ -872,13 +893,13 @@ function renderLabelPopover(record: MdRecord): HTMLElement {
     if (labelPickerIndex >= options.length) {
       create.classList.add('highlighted');
     }
-    create.textContent = `「${labelPickerQuery.trim()}」を作成して付与`;
+    create.textContent = t('Create "{0}" and attach it', labelPickerQuery.trim());
     create.addEventListener('click', () => createAndAssign(record));
     list.appendChild(create);
   } else if (options.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'pane-hint';
-    empty.textContent = 'ラベルがありません';
+    empty.textContent = t('No labels');
     list.appendChild(empty);
   }
 
@@ -903,13 +924,13 @@ function renderActions(): HTMLElement {
 
   const dirtyIndicator = document.createElement('span');
   dirtyIndicator.className = 'dirty-indicator';
-  dirtyIndicator.textContent = dirty ? '● 未保存の変更があります' : '';
+  dirtyIndicator.textContent = dirty ? t('● Unsaved changes') : '';
   actions.appendChild(dirtyIndicator);
 
   const saveButton = document.createElement('button');
   saveButton.className = 'save-button';
-  saveButton.textContent = '保存';
-  saveButton.title = '保存 (Ctrl/Cmd+S)';
+  saveButton.textContent = t('Save');
+  saveButton.title = t('Save (Ctrl/Cmd+S)');
   saveButton.disabled = offline || !dirty;
   saveButton.addEventListener('click', onSave);
   actions.appendChild(saveButton);
@@ -919,7 +940,7 @@ function renderActions(): HTMLElement {
 
     const loadButton = document.createElement('button');
     loadButton.className = 'load-button';
-    loadButton.textContent = 'プロジェクトにロード';
+    loadButton.textContent = t('Load into Project');
     // ロードはローカルファイルへの書き出しなので、保存・削除と違いオフラインでも実行できる。
     // ただしロードされるのは保存済みの内容なので、未保存の変更がある間は押させない。
     loadButton.disabled = dirty;
@@ -928,7 +949,7 @@ function renderActions(): HTMLElement {
 
     const deleteButton = document.createElement('button');
     deleteButton.className = 'secondary-button';
-    deleteButton.textContent = '削除';
+    deleteButton.textContent = t('Delete');
     deleteButton.disabled = offline;
     deleteButton.addEventListener('click', () => {
       post({ type: 'delete', requestId: newRequestId(), id, title: draft?.title || draft?.filename || '' });
@@ -948,7 +969,7 @@ function markDirty(): void {
   dirty = true;
   const indicator = document.querySelector<HTMLElement>('.dirty-indicator');
   if (indicator) {
-    indicator.textContent = '● 未保存の変更があります';
+    indicator.textContent = t('● Unsaved changes');
   }
   const saveButton = document.querySelector<HTMLButtonElement>('.save-button');
   if (saveButton) {
@@ -1132,7 +1153,7 @@ window.addEventListener('message', (event: MessageEvent<HostToWebviewMessage>) =
       return;
     case 'labelCreated':
       errorMessage = null;
-      labels = [...labels, message.label].sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      labels = [...labels, message.label].sort((a, b) => compareNames(a.name, b.name));
       newLabelDraft = '';
       if (pendingAssignMdId) {
         // エディタのポップオーバーから作った場合は、作成に続けて付与まで済ませる。
@@ -1151,7 +1172,7 @@ window.addEventListener('message', (event: MessageEvent<HostToWebviewMessage>) =
       errorMessage = null;
       labels = labels
         .map((label) => (label.id === message.label.id ? message.label : label))
-        .sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+        .sort((a, b) => compareNames(a.name, b.name));
       renamingLabelId = null;
       render();
       return;

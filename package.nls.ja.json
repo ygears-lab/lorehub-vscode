@@ -1,0 +1,19 @@
+{
+  "extension.description": "CLAUDE.md / SKILL.md / .cursorrules / AGENTS.md をクラウド同期のライブラリにまとめ、ラベルで整理し、VS Code から離れずに任意のプロジェクトへロードします。",
+  "configuration.statusBar.enabled.description": "ステータスバーに LoreHub の項目を表示します。ログイン状態が分かり、クリックでログイン / ログアウトできます。",
+  "command.login.title": "GitHub でログイン",
+  "command.logout.title": "ログアウト",
+  "command.openMdPanel.title": "マイライブラリを開く",
+  "command.loadToProject.title": "md をプロジェクトにロード",
+  "walkthrough.title": "LoreHub をはじめる",
+  "walkthrough.description": "ログインして、クラウド同期された AI 設定ファイルのライブラリを開き、作業中のプロジェクトへロードします。",
+  "walkthrough.signIn.title": "GitHub でログインする",
+  "walkthrough.signIn.description": "ライブラリはこのマシンではなくアカウントに紐づきます。ログインすれば、どのコンピューターでも同じ md が待っています。\n[GitHub でログイン](command:lorehub.login)",
+  "walkthrough.signIn.altText": "1つのクラウド同期 md ライブラリを共有する2台のコンピューター",
+  "walkthrough.openLibrary.title": "md ライブラリを開く",
+  "walkthrough.openLibrary.description": "CLAUDE.md / AGENTS.md / SKILL.md / .cursorrules を1つのパネルで閲覧・編集・整理できます。数が増えてもラベルで見つけられます。\n[マイライブラリを開く](command:lorehub.openMdPanel)",
+  "walkthrough.openLibrary.altText": "LoreHub のパネル: ラベル、ファイル一覧、エディター",
+  "walkthrough.loadIntoProject.title": "md をこのプロジェクトにロードする",
+  "walkthrough.loadIntoProject.description": "ライブラリからファイルを選び、指定したフォルダーへ書き出します。エクスプローラーでフォルダーを右クリックすれば、そこへ直接ロードできます。\n[md をプロジェクトにロード](command:lorehub.loadToProject)",
+  "walkthrough.loadIntoProject.altText": "ライブラリからプロジェクトフォルダーへ移動する md ファイル"
+}

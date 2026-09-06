@@ -28,14 +28,19 @@ export class MdPanel {
       MdPanel.currentPanel.panel.reveal();
       return;
     }
-    const panel = vscode.window.createWebviewPanel('lorehub.mdPanel', 'LoreHub: My md Files', vscode.ViewColumn.One, {
-      enableScripts: true,
-      retainContextWhenHidden: true,
-      localResourceRoots: [
-        vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview'),
-        vscode.Uri.joinPath(context.extensionUri, 'media'),
-      ],
-    });
+    const panel = vscode.window.createWebviewPanel(
+      'lorehub.mdPanel',
+      vscode.l10n.t('LoreHub: My md Files'),
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [
+          vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview'),
+          vscode.Uri.joinPath(context.extensionUri, 'media'),
+        ],
+      },
+    );
     MdPanel.currentPanel = new MdPanel(panel, context, authService, mdService, labelService, loadService);
   }
 
@@ -116,12 +121,13 @@ export class MdPanel {
       }
       case 'delete': {
         if (!this.requireAuth(message.requestId)) {return;}
+        const confirmDelete = vscode.l10n.t('Delete');
         const choice = await vscode.window.showWarningMessage(
-          `LoreHub: 「${message.title}」を削除しますか?`,
+          vscode.l10n.t('LoreHub: Delete "{0}"?', message.title),
           { modal: true },
-          '削除',
+          confirmDelete,
         );
-        if (choice !== '削除') {
+        if (choice !== confirmDelete) {
           return;
         }
         try {
@@ -178,12 +184,16 @@ export class MdPanel {
       }
       case 'deleteLabel': {
         if (!this.requireAuth(message.requestId)) {return;}
+        const confirmDelete = vscode.l10n.t('Delete');
         const choice = await vscode.window.showWarningMessage(
-          `LoreHub: ラベル「${message.name}」を削除しますか?(付与されている全てのmdから外れます)`,
+          vscode.l10n.t(
+            'LoreHub: Delete the label "{0}"? It is removed from every md it is attached to.',
+            message.name,
+          ),
           { modal: true },
-          '削除',
+          confirmDelete,
         );
-        if (choice !== '削除') {
+        if (choice !== confirmDelete) {
           return;
         }
         try {
@@ -220,7 +230,7 @@ export class MdPanel {
     if (this.authService.isAuthenticated()) {
       return true;
     }
-    this.post({ type: 'error', kind: 'auth', message: 'ログインが必要です', requestId });
+    this.post({ type: 'error', kind: 'auth', message: vscode.l10n.t('You need to be logged in'), requestId });
     return false;
   }
 
@@ -251,7 +261,7 @@ export class MdPanel {
       this.post({
         type: 'error',
         kind: 'auth',
-        message: 'セッションが無効になりました。再度ログインしてください',
+        message: vscode.l10n.t('Your session is no longer valid. Please log in again'),
         requestId,
       });
       void this.authService.handleRejectedSession();
