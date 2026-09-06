@@ -144,7 +144,7 @@ function renderToolbar(): HTMLElement {
 
   const newButton = document.createElement('button');
   newButton.textContent = '新規作成';
-  newButton.title = '新規作成 (Ctrl/Cmd+N)';
+  newButton.title = '新規作成';
   newButton.disabled = offline;
   newButton.addEventListener('click', onNew);
 
@@ -614,7 +614,7 @@ function renderEditor(): HTMLElement {
   if (!draft) {
     const empty = document.createElement('p');
     empty.className = 'pane-hint';
-    empty.textContent = '左のリストから選択するか、新規作成してください (Ctrl/Cmd+N)';
+    empty.textContent = '左のリストから選択するか、新規作成してください';
     container.appendChild(empty);
     return container;
   }
@@ -997,13 +997,6 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
     event.preventDefault();
     if (draft && dirty && !offline) {
       onSave();
-    }
-    return;
-  }
-  if (modifier && event.key === 'n') {
-    event.preventDefault();
-    if (!offline) {
-      onNew();
     }
     return;
   }
