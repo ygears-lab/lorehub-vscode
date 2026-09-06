@@ -12,7 +12,7 @@ npm run compile
 ```
 
 Press <kbd>F5</kbd> to launch the Extension Development Host, then run
-**LoreHub: Open My md Files** from the Command Palette.
+**LoreHub: Open My Library** from the Command Palette.
 
 To run against a local Supabase stack:
 

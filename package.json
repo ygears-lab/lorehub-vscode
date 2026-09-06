@@ -69,7 +69,8 @@
       },
       {
         "command": "lorehub.openMdPanel",
-        "title": "Open My md Files",
+        "title": "Open My Library",
+        "shortTitle": "LoreHub",
         "category": "LoreHub",
         "icon": "$(book)"
       },
@@ -133,7 +134,7 @@
           {
             "id": "openLibrary",
             "title": "Open your md library",
-            "description": "Browse, write and organise your CLAUDE.md, AGENTS.md, SKILL.md and .cursorrules files in one panel. Labels keep them findable once the collection grows.\n[Open My md Files](command:lorehub.openMdPanel)",
+            "description": "Browse, write and organise your CLAUDE.md, AGENTS.md, SKILL.md and .cursorrules files in one panel. Labels keep them findable once the collection grows.\n[Open My Library](command:lorehub.openMdPanel)",
             "media": {
               "svg": "media/walkthrough/library.svg",
               "altText": "The LoreHub panel: labels, a file list and an editor"

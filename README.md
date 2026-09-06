@@ -55,7 +55,7 @@ online, so nothing is silently lost.
 ## Getting started
 
 1. Install the extension.
-2. Run **LoreHub: Open My md Files** from the Command Palette.
+2. Run **LoreHub: Open My Library** from the Command Palette.
 3. Sign in with GitHub.
 4. Create a file or import one, give it a label, and load it into your project.
 
@@ -70,7 +70,7 @@ online, so nothing is silently lost.
 | <kbd>Esc</kbd> | Clear search / close popover |
 
 These commands are also available from the Command Palette:
-**Open My md Files**, **Load md into Project**, **Login with GitHub**, **Logout**.
+**Open My Library**, **Load md into Project**, **Login with GitHub**, **Logout**.
 
 ## Requirements
 

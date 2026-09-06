@@ -52,7 +52,7 @@ LoreHubは逆の作りにしています。
 ## 使いはじめる
 
 1. 拡張機能をインストールする
-2. コマンドパレットから **LoreHub: Open My md Files** を実行する
+2. コマンドパレットから **LoreHub: Open My Library** を実行する
 3. GitHubでログインする
 4. mdを作る（またはインポートする）→ ラベルを付ける → プロジェクトにロードする
 
@@ -67,7 +67,7 @@ LoreHubは逆の作りにしています。
 | <kbd>Esc</kbd> | 検索クリア／ポップオーバーを閉じる |
 
 以下はコマンドパレットからも実行できます。
-**Open My md Files** / **Load md into Project** / **Login with GitHub** / **Logout**
+**Open My Library** / **Load md into Project** / **Login with GitHub** / **Logout**
 
 ## 動作要件
 
