@@ -1,75 +1,109 @@
 # LoreHub
 
-Your personal, cloud-synced library of AI config files — inside VS Code.
+**Your personal, cloud-synced library of AI config files — inside VS Code.**
 
-LoreHub keeps the Markdown files you use to configure AI coding tools
-(`CLAUDE.md`, `SKILL.md`, `.cursorrules`, `AGENTS.md`, …) in one place, tied to
-your account rather than to one machine. Organize them with labels, then load
-any of them straight into the repository you are working on without leaving the
-editor.
+*[日本語版はこちら](README.ja.md)*
 
-> **Status: pre-release.** This extension is not published to the VS Code
-> Marketplace yet. The code here is complete for the initial feature set and is
-> being prepared for its first listing.
+You have collected a lot of `CLAUDE.md`, `SKILL.md`, `.cursorrules` and `AGENTS.md` files.
+They are scattered across repositories, gists, and folders on whichever machine you happened
+to be using. When you start a new project, you cannot find the one you wanted.
+
+LoreHub keeps them in one place, tied to your account rather than to one machine, and puts
+them one click away from the project you are working on right now.
+
+<!-- SCREENSHOT 1 — the differentiator. The same md library open on a second machine.
+     Per docs/2026-09-06 requirements §10.1, cloud sync is the headline, not the loading. -->
+
+## Why LoreHub
+
+Most tools in this space are local-first: your library lives in one folder, on one computer.
+LoreHub is built the other way around.
+
+- **It follows your account, not your machine.** Sign in with GitHub on a new laptop and your
+  whole library is there.
+- **It stays in the editor.** No web app to switch to, no folder to remember.
+- **It is organized for people who collect a lot.** Labels, counts, and search are designed for
+  a library that keeps growing, not for five files.
 
 ## Features
 
-- **Cloud-synced library** — sign in with GitHub; your files follow you to any
-  machine and any repository.
-- **Write or import** — create Markdown from scratch in the editor panel, or
-  import an existing file from disk.
-- **Labels** — assign as many labels as you like to a file, then filter the
-  list by them. Label counts are always visible, so a growing collection stays
-  legible.
-- **Search** — filter by title or filename, on top of label filtering.
-- **Load into a project** — write a file into your workspace, choosing the
-  destination each time. If the target already exists, LoreHub opens a diff
-  before overwriting.
-- **Offline-aware** — cached files stay readable when the network is down;
-  writes are disabled until you are back online.
+**Write or import**
+Create Markdown from scratch in the editor panel, or import a file that is already on disk.
+
+**Organize with labels**
+Assign as many labels as you like to a file. The sidebar shows every label with a live count,
+so you can see at a glance which parts of your library are growing and which are empty.
+Filter by one label or several at once.
+
+<!-- SCREENSHOT 2 — the three-pane panel: label sidebar, md list, editor. -->
+
+**Find things again**
+Search by title or filename, on top of label filtering. Files are sorted by most recently
+updated, so what you actually use stays at the top.
+
+**Load into a project**
+Write any file into your workspace, choosing where it goes each time. If a file with that name
+already exists, LoreHub opens a diff so you can see exactly what would change before it
+overwrites anything.
+
+<!-- SCREENSHOT 3 — the diff shown before overwriting an existing file. -->
+
+**Works offline**
+Your library stays readable when the network is down. Editing is disabled until you are back
+online, so nothing is silently lost.
+
+## Getting started
+
+1. Install the extension.
+2. Run **LoreHub: Open My md Files** from the Command Palette.
+3. Sign in with GitHub.
+4. Create a file or import one, give it a label, and load it into your project.
+
+### Keyboard
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>Ctrl/Cmd</kbd> + <kbd>N</kbd> | New file |
+| <kbd>Ctrl/Cmd</kbd> + <kbd>S</kbd> | Save |
+| <kbd>/</kbd> | Focus search |
+| <kbd>↑</kbd> <kbd>↓</kbd> | Move through the list |
+| <kbd>Esc</kbd> | Clear search / close popover |
+
+These commands are also available from the Command Palette:
+**Open My md Files**, **Load md into Project**, **Login with GitHub**, **Logout**.
 
 ## Requirements
 
-- VS Code `^1.104.0`
-- A Supabase project (the extension stores your library there)
+VS Code `1.104.0` or later.
 
-## Development
+## Pricing
 
-```bash
-npm install
-cp .env.example .env   # then fill in your Supabase URL and anon key
-npm run compile
-```
+**Everything in LoreHub is free today.** There are no paid features, no trial, and no account
+tiers in this release.
 
-Press <kbd>F5</kbd> to launch the Extension Development Host, then run
-**LoreHub: Open My md Files** from the Command Palette.
+In the future some additional capabilities — team sharing, or higher limits on translation and
+summarization — may become paid. Everything described on this page is intended to stay free.
 
-To run against a local Supabase stack:
+If there is something you would pay for, [tell us in an issue](https://github.com/ygears-lab/lorehub-vscode/issues).
+That is the most useful thing you can send us right now.
 
-```bash
-supabase start
-supabase migration up
-```
+## Your data
 
-Useful scripts:
+The Markdown you save is stored in LoreHub's Supabase backend and is tied to your GitHub
+account. Every row is protected by PostgreSQL row-level security, so no other user can read it.
+Your authentication token is kept in VS Code's SecretStorage, never in plain text.
 
-| Script | Purpose |
-| --- | --- |
-| `npm run compile` | Development build |
-| `npm run watch` | Rebuild on change |
-| `npm run package` | Production build |
-| `npm run check-types` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
+Files you load into a project are written to your machine only. LoreHub never reads the rest of
+your workspace.
 
-### Architecture
+<!-- TODO: link the published privacy policy here before the Marketplace listing goes live. -->
 
-The extension is a single WebView panel (`src/webview/`) talking to the
-extension host over a typed message protocol (`src/webview/protocol.ts`), which
-in turn calls Supabase through the service layer (`src/auth/`, `src/md/`,
-`src/label/`, `src/load/`). All access control lives in Postgres Row Level
-Security — see `supabase/migrations/`.
+## Contributing
+
+Bug reports and feature requests are welcome in
+[Issues](https://github.com/ygears-lab/lorehub-vscode/issues).
+For building and running the extension locally, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](./LICENSE). Bundled dependencies are listed in
-[THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md).
+[MIT](LICENSE). Bundled dependencies are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

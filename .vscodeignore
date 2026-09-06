@@ -29,5 +29,9 @@
 !package.json
 !README.md
 !LICENSE
+# 同梱している依存パッケージの著作権表示。MITは複製物すべてへの表示保持を求めるため、
+# 配布物であるVSIXにも必ず含める。productionビルドはライセンスコメントを落とすので、
+# このファイルが唯一の表示になる。
+!THIRD-PARTY-NOTICES.md
 !CHANGELOG.md
 !icon.png

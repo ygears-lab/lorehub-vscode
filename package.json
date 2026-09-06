@@ -1,7 +1,9 @@
 {
   "name": "lorehub-vscode",
   "displayName": "LoreHub",
-  "description": "AI開発ツールの設定ファイル（CLAUDE.md / SKILL.md / .cursorrules / AGENTS.md 等）を整理して管理するVSCode拡張",
+  "description": "Keep your CLAUDE.md, SKILL.md, .cursorrules and AGENTS.md files in one cloud-synced library, organize them with labels, and load them into any project without leaving VS Code.",
+  "version": "0.0.1",
+  "publisher": "YGears",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -10,14 +12,33 @@
   "bugs": {
     "url": "https://github.com/ygears-lab/lorehub-vscode/issues"
   },
-  "version": "0.0.1",
-  "publisher": "YGears",
+  "homepage": "https://github.com/ygears-lab/lorehub-vscode#readme",
+  "keywords": [
+    "ai",
+    "claude",
+    "claude-code",
+    "cursor",
+    "copilot",
+    "agents.md",
+    "skill.md",
+    "cursorrules",
+    "markdown",
+    "prompt",
+    "sync"
+  ],
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#22272E",
+    "theme": "dark"
+  },
+  "pricing": "Free",
   "engines": {
     "vscode": "^1.104.0"
   },
-  "categories": [
-    "Other"
-  ],
   "main": "./dist/extension.js",
   "activationEvents": [
     "onUri"
