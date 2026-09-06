@@ -1,0 +1,37 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# build output
+/dist
+*.vsix
+
+# misc
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+.env
+
+# settings
+.envrc
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# 設計ドキュメント・計画・AIエージェント用の作業ファイルは、
+# 同じ作業ディレクトリにネストした別のプライベートリポジトリで管理する。
+# ここで無視しているため、公開リポジトリ側はその存在を認識しない。
+/docs/
+/plans/
+/.claude/
+/CLAUDE.md

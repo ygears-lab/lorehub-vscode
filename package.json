@@ -1,0 +1,73 @@
+{
+  "name": "lorehub-vscode",
+  "displayName": "LoreHub",
+  "description": "AI開発ツールの設定ファイル（CLAUDE.md / SKILL.md / .cursorrules / AGENTS.md 等）を整理して管理するVSCode拡張",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ygears-lab/lorehub-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ygears-lab/lorehub-vscode/issues"
+  },
+  "version": "0.0.1",
+  "publisher": "YGears",
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onUri"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "lorehub.login",
+        "title": "Login with GitHub",
+        "category": "LoreHub"
+      },
+      {
+        "command": "lorehub.logout",
+        "title": "Logout",
+        "category": "LoreHub"
+      },
+      {
+        "command": "lorehub.openMdPanel",
+        "title": "Open My md Files",
+        "category": "LoreHub"
+      },
+      {
+        "command": "lorehub.loadToProject",
+        "title": "Load md into Project",
+        "category": "LoreHub"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.104.0",
+    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@typescript-eslint/parser": "^8.68.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.9.1",
+    "supabase": "^2.116.0",
+    "typescript": "^5.9.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

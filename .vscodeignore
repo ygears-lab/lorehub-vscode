@@ -1,0 +1,33 @@
+# VSIX（Marketplaceで配布されるパッケージ）に何を含めるかの設定。
+#
+# 【重要】ここは「入れたくないものを列挙する」方式ではなく、
+# 「まず全部除外し、配布に必要なものだけを ! で戻す」許可リスト方式にしている。
+# 除外し忘れが即座に情報漏洩（.env 等）につながるため、
+# 新しいファイルはデフォルトで VSIX に入らない側に倒す。
+#
+# 変更したら必ず `npx @vscode/vsce ls` で中身を確認すること。
+# なお package.json / README.md / LICENSE / CHANGELOG.md は
+# vsce が常に含めるため、下の ! 行が無くても入る。
+
+# まず全部除外する
+**
+
+# --- ここから、配布に必要なものだけを戻す ---
+
+# 拡張本体（esbuildの出力）。
+# .map を巻き込まないよう拡張子を明示している。
+# vsce は「!で戻したものを後の行で再度除外する」ができないため、
+# `**/*.map` のような打ち消し行に頼らないこと。
+!dist/extension.js
+!dist/webview/**/*.js
+!dist/webview/**/*.css
+
+# WebViewが読み込む静的アセット
+!media/**
+
+# Marketplace掲載ページ用
+!package.json
+!README.md
+!LICENSE
+!CHANGELOG.md
+!icon.png

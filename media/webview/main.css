@@ -1,0 +1,532 @@
+/* LoreHubのWebViewはVSCode本体の見た目に地続きであることを優先する。
+ * 色は必ず --vscode-* 変数から取り、独自パレット・影・グラデーションは使わない。 */
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-editor-background);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+button {
+  color: var(--vscode-button-foreground);
+  background-color: var(--vscode-button-background);
+  border: none;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.secondary-button {
+  color: var(--vscode-button-secondaryForeground, var(--vscode-button-foreground));
+  background-color: var(--vscode-button-secondaryBackground, var(--vscode-button-background));
+}
+
+.secondary-button:hover:not(:disabled) {
+  background-color: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground));
+}
+
+input,
+textarea {
+  color: var(--vscode-input-foreground);
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, transparent);
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input:focus,
+textarea:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.pane-heading {
+  padding: 6px 10px;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.pane-hint {
+  padding: 4px 10px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.login-view {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+}
+
+.error-banner {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--vscode-inputValidation-errorBackground);
+  color: var(--vscode-inputValidation-errorForeground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-inputValidation-errorBorder, transparent);
+}
+
+.offline-banner {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--vscode-inputValidation-warningBackground);
+  color: var(--vscode-inputValidation-warningForeground, var(--vscode-foreground));
+}
+
+.management-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+/* 3カラム: ラベルナビ(固定) / md一覧(固定) / エディタ(可変) */
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* --- 左: ラベルナビゲーション ------------------------------------------- */
+
+.label-nav {
+  flex: none;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--vscode-panel-border);
+  background-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
+}
+
+.label-nav-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.label-nav-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.label-nav-row.editing {
+  gap: 2px;
+  padding: 2px 4px;
+}
+
+.label-nav-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 3px 10px;
+  text-align: left;
+  color: var(--vscode-foreground);
+  background-color: transparent;
+}
+
+/* アイコンを重ねている都合上、行のどこにカーソルがあってもハイライトを維持する。 */
+.label-nav-row:hover .label-nav-item:not(:disabled) {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.label-nav-item.active {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.label-nav-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.label-nav-count {
+  flex: none;
+  font-size: 0.85em;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 反復操作（リネーム・削除）はホバー時だけ出す。行の上に重ねることで、
+ * アイコンの出現でラベル名や件数が押し縮められるガタつきを避ける。
+ * 背景はサイドバー色の上にホバー色を重ね、半透明テーマでも下の文字を透かさない。 */
+.label-nav-actions {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  background-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  background-image: linear-gradient(
+    var(--vscode-list-hoverBackground),
+    var(--vscode-list-hoverBackground)
+  );
+}
+
+.label-nav-row:hover .label-nav-actions,
+.label-nav-row:focus-within .label-nav-actions {
+  display: flex;
+}
+
+.label-nav-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.label-nav-footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
+.icon-button {
+  flex: none;
+  padding: 2px 5px;
+  line-height: 1.2;
+  color: var(--vscode-foreground);
+  background-color: transparent;
+}
+
+.icon-button:hover:not(:disabled) {
+  background-color: var(--vscode-toolbar-hoverBackground, var(--vscode-list-hoverBackground));
+}
+
+.text-button {
+  width: 100%;
+  padding: 3px 6px;
+  text-align: left;
+  color: var(--vscode-textLink-foreground, var(--vscode-foreground));
+  background-color: transparent;
+}
+
+.text-button:hover:not(:disabled) {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+/* --- 中央: md一覧 --------------------------------------------------------- */
+
+.list-pane {
+  flex: none;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--vscode-panel-border);
+}
+
+.search-box {
+  flex: none;
+  padding: 6px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.md-list {
+  flex: 1;
+  min-height: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.md-list li {
+  padding: 5px 10px;
+  cursor: pointer;
+  overflow: hidden;
+  border-left: 2px solid transparent;
+}
+
+.md-list-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.md-list-title {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.md-list-time {
+  flex: none;
+  font-size: 0.85em;
+  color: var(--vscode-descriptionForeground);
+  font-variant-numeric: tabular-nums;
+}
+
+.md-list-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.md-list li:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.md-list li.selected {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+  border-left-color: var(--vscode-focusBorder);
+}
+
+.md-list li.selected .md-list-time {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.md-list-empty {
+  cursor: default;
+  color: var(--vscode-descriptionForeground);
+}
+
+.md-list-empty:hover {
+  background-color: transparent;
+}
+
+.list-footer {
+  flex: none;
+  padding: 4px 10px;
+  font-size: 0.85em;
+  color: var(--vscode-descriptionForeground);
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
+/* --- 右: エディタ --------------------------------------------------------- */
+
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  min-width: 0;
+}
+
+/* md本文はコードに近いテキストなので、UIフォントではなくエディタの等幅フォントで扱う。 */
+.editor .content-area {
+  flex: 1;
+  resize: none;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size, inherit);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dirty-indicator {
+  margin-right: auto;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* --- ラベルチップ --------------------------------------------------------- */
+
+.label-chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+/* --- エディタ側のラベル付与UI ---------------------------------------------
+ * ラベル総数に関係なく高さが暴れないよう、ここには付与済みのチップだけを出す。
+ * 付与操作はQuick Pick型のポップオーバー側に閉じ込める。 */
+
+.label-picker {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.label-picker .pane-hint {
+  padding: 0 4px 0 0;
+}
+
+.label-chip-assigned {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 2px;
+}
+
+.chip-remove {
+  padding: 0 3px;
+  font-size: 0.9em;
+  line-height: 1.2;
+  color: inherit;
+  background-color: transparent;
+  opacity: 0.6;
+}
+
+.chip-remove:hover:not(:disabled) {
+  background-color: transparent;
+  opacity: 1;
+}
+
+.chip-add {
+  padding: 1px 6px;
+  border: 1px dashed var(--vscode-descriptionForeground);
+  border-radius: 3px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  color: var(--vscode-descriptionForeground);
+  background-color: transparent;
+}
+
+.chip-add:hover:not(:disabled) {
+  color: var(--vscode-foreground);
+  border-color: var(--vscode-foreground);
+  background-color: transparent;
+}
+
+/* テキストエリアに重ねて上向きに開く。下方向だとパネル下端で切れるため。 */
+.label-popover {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  z-index: 10;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--vscode-widget-border, var(--vscode-panel-border));
+  background-color: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+
+.label-popover-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.label-popover-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.label-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  text-align: left;
+  color: var(--vscode-foreground);
+  background-color: transparent;
+}
+
+.label-option:hover:not(:disabled) {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+/* キーボードで移動している位置。ホバーと区別できるよう選択色を使う。 */
+.label-option.highlighted {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.label-option-check {
+  flex: none;
+  width: 1em;
+  text-align: center;
+}
+
+.label-option-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.label-option-count {
+  flex: none;
+  font-size: 0.85em;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.label-option-create {
+  border-top: 1px solid var(--vscode-panel-border);
+  color: var(--vscode-textLink-foreground, var(--vscode-foreground));
+}
+
+.label-option-create.highlighted {
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.label-popover .pane-hint {
+  padding: 4px;
+}
