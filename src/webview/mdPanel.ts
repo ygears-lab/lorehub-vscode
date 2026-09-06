@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { AuthService } from '../auth/authService';
 import type { LabelService } from '../label/labelService';
 import type { LabelRecord } from '../label/types';
+import { SessionRejectedError } from '../auth/sessionRejection';
 import { LabelNetworkError, LabelValidationError } from '../label/validation';
 import type { LoadService } from '../load/loadService';
 import { LoadValidationError } from '../load/validation';
@@ -244,6 +245,19 @@ export class MdPanel {
   }
 
   private postError(err: unknown, requestId?: string): void {
+    // サーバーにトークンを拒否された場合は、生のJWTエラー文を見せてもユーザーには
+    // 何をすればよいか分からない。文言を差し替えたうえで再認証の導線へ流す。
+    if (err instanceof SessionRejectedError) {
+      this.post({
+        type: 'error',
+        kind: 'auth',
+        message: 'セッションが無効になりました。再度ログインしてください',
+        requestId,
+      });
+      void this.authService.handleRejectedSession();
+      return;
+    }
+
     // LoadValidationErrorはローカル操作の失敗なので、network側に混ぜてオフライン扱いにしないこと。
     const kind: ErrorKind =
       err instanceof MdValidationError || err instanceof LabelValidationError || err instanceof LoadValidationError

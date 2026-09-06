@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { SupabaseClient, Session } from '@supabase/supabase-js';
 import type { LoreHubUriHandler } from './uriHandler';
 import type { AuthState, AuthStatus } from './types';
+import { AUTH_STORAGE_KEY } from './constants';
 import { LABEL_CACHE_KEY } from '../label/constants';
 import { MD_CACHE_KEY } from '../md/constants';
 
@@ -18,6 +19,7 @@ export class AuthService implements vscode.Disposable {
 
   private state: AuthState = { status: 'unauthenticated', session: null, user: null };
   private loggingIn = false;
+  private handlingRejection = false;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -81,6 +83,38 @@ export class AuthService implements vscode.Disposable {
     );
     if (choice === 'ログイン') {
       await this.login();
+    }
+  }
+
+  /**
+   * サーバーにセッションを拒否されたときの回復経路。
+   *
+   * `restoreSession()` が見る `getSession()` はローカルの保存内容を返すだけでサーバー検証をしない。
+   * そのため「トークンはあるがサーバーが受け付けない」状態では、拡張はログイン済みのまま
+   * 全ての操作が失敗し続け、ユーザーは `LoreHub: Logout` の存在を知らない限り自力で戻れない。
+   * 署名鍵のローテーション、管理画面からのセッション失効、接続先の切り替えで発生する。
+   */
+  async handleRejectedSession(): Promise<void> {
+    // 一覧とラベルの取得が同時に失敗するなど、複数のリクエストが同時に拒否されるため
+    // 多重発火を抑える。抑えないと再ログインの確認ダイアログが要求数だけ積み上がる。
+    if (this.handlingRejection || this.state.status === 'unauthenticated') {
+      return;
+    }
+    this.handlingRejection = true;
+    try {
+      // scope:'local' はサーバーへ問い合わせずクライアント側のセッションだけを破棄する。
+      // 拒否されたトークンでのサインアウトはサーバー側で失敗するため、ここで通信してはいけない。
+      try {
+        await this.supabase.auth.signOut({ scope: 'local' });
+      } catch {
+        // 破棄はSecretStorageの削除で担保するため、失敗しても続行する。
+      }
+      await this.context.secrets.delete(AUTH_STORAGE_KEY);
+      // キャッシュは残す。同一ユーザーのデータであり、再ログイン後にそのまま使えるため。
+      this.setState('unauthenticated', null);
+      await this.notifySessionExpired();
+    } finally {
+      this.handlingRejection = false;
     }
   }
 
@@ -171,7 +205,7 @@ export class AuthService implements vscode.Disposable {
     } catch {
       // オフライン等でのリモートサインアウト失敗は無視し、ローカルのクリアは必ず実行する
     }
-    await this.context.secrets.delete('lorehub-auth');
+    await this.context.secrets.delete(AUTH_STORAGE_KEY);
     await this.context.globalState.update(HAD_SESSION_KEY, false);
     await this.context.globalState.update(MD_CACHE_KEY, undefined);
     // ラベル名もユーザーが作ったデータなので、md本体と同じくログアウト時に必ず消す。

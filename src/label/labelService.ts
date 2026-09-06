@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AuthService } from '../auth/authService';
+import { SessionRejectedError, isSessionRejectedMessage } from '../auth/sessionRejection';
 import { LABEL_CACHE_KEY } from './constants';
 import type { LabelRecord } from './types';
 import { LabelNetworkError, LabelValidationError, assertNonBlankName } from './validation';
@@ -34,6 +35,11 @@ function isNetworkErrorMessage(message: string): boolean {
 }
 
 function toServiceError(message: string): Error {
+  // 到達できたがトークンを拒否された場合は、ネットワーク障害でも入力ミスでもなく
+  // 再認証が必要な状態なので、呼び出し側が区別できるよう専用のエラーにする。
+  if (isSessionRejectedMessage(message)) {
+    return new SessionRejectedError(message);
+  }
   return isNetworkErrorMessage(message) ? new LabelNetworkError(message) : new Error(message);
 }
 
