@@ -211,6 +211,15 @@ textarea:focus {
     var(--vscode-list-hoverBackground),
     var(--vscode-list-hoverBackground)
   );
+  /* この要素は行に重なっているうえ、クリックするには必ずホバーしている＝必ず表示されている。
+   * そのまま置くとアイコンの隙間や余白が行のクリックを飲み込み、
+   * 「絞り込みが効いたり効かなかったりする」状態になる。
+   * 容器はクリックを透過させ、アイコン自身だけが受け取るようにする。 */
+  pointer-events: none;
+}
+
+.label-nav-actions .icon-button {
+  pointer-events: auto;
 }
 
 .label-nav-row:hover .label-nav-actions,
