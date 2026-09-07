@@ -12,7 +12,7 @@ LoreHub keeps them in one place, tied to your account rather than to one machine
 them one click away from the project you are working on right now.
 
 <!-- SCREENSHOT 1 — the differentiator. The same md library open on a second machine.
-     Per docs/2026-09-06 requirements §10.1, cloud sync is the headline, not the loading. -->
+     Cloud sync is the headline, not the loading. -->
 
 ## Why LoreHub
 
@@ -28,7 +28,8 @@ LoreHub is built the other way around.
 ## Features
 
 **Write or import**
-Create Markdown from scratch in the editor panel, or import a file that is already on disk.
+Hit **New** in the panel toolbar to write Markdown from scratch, or **Import** to pull in a file
+that is already on disk.
 
 **Organize with labels**
 Assign as many labels as you like to a file. The sidebar shows every label with a live count,
@@ -52,6 +53,14 @@ overwrites anything.
 Your library stays readable when the network is down. Editing is disabled until you are back
 online, so nothing is silently lost.
 
+**Reachable from the project you are in**
+Open a `CLAUDE.md`, `AGENTS.md`, `SKILL.md` or `.cursorrules` file and a LoreHub button appears in
+the editor title bar. Right-click a folder in the Explorer to load a file straight into it, without
+being asked where it goes.
+
+**English and Japanese**
+The panel, the commands and the messages all follow VS Code's display language.
+
 ## Getting started
 
 1. Install the extension.
@@ -59,15 +68,17 @@ online, so nothing is silently lost.
 3. Sign in with GitHub.
 4. Create a file or import one, give it a label, and load it into your project.
 
+The same steps are built into VS Code: open the Welcome page and pick
+**Get started with LoreHub**.
+
 ### Keyboard
 
 | Shortcut | Action |
 | --- | --- |
-| <kbd>Ctrl/Cmd</kbd> + <kbd>N</kbd> | New file |
-| <kbd>Ctrl/Cmd</kbd> + <kbd>S</kbd> | Save |
+| <kbd>Ctrl/Cmd</kbd> + <kbd>S</kbd> | Save the file you are editing |
 | <kbd>/</kbd> | Focus search |
 | <kbd>↑</kbd> <kbd>↓</kbd> | Move through the list |
-| <kbd>Esc</kbd> | Clear search / close popover |
+| <kbd>Esc</kbd> | Close the popover, then clear the search |
 
 These commands are also available from the Command Palette:
 **Open My Library**, **Load md into Project**, **Login with GitHub**, **Logout**.
@@ -98,11 +109,10 @@ your workspace.
 
 <!-- TODO: link the published privacy policy here before the Marketplace listing goes live. -->
 
-## Contributing
+## Feedback
 
 Bug reports and feature requests are welcome in
 [Issues](https://github.com/ygears-lab/lorehub-vscode/issues).
-For building and running the extension locally, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
