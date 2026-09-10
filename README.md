@@ -6,6 +6,8 @@ LoreHub
 
 Sign in with GitHub on a new machine and your library is already there, so you never have to collect the files again.
 
+> **Early release** — LoreHub is still young, so features and behavior may change.
+
 ![The LoreHub md library panel](https://raw.githubusercontent.com/ygears-lab/lorehub-vscode/main/assets/screenshots/01-library-overview.png)
 
 ### Main features

@@ -6,6 +6,8 @@ LoreHub
 
 新しいマシンでも、GitHubでサインインすればいつものライブラリがそのまま開きます。集め直す必要はありません。
 
+> **Early release** — LoreHub は公開したばかりです。機能や挙動は今後変わる可能性があります。
+
 ![LoreHubのmdライブラリ画面](https://raw.githubusercontent.com/ygears-lab/lorehub-vscode/main/assets/screenshots/01-library-overview.png)
 
 ### 主な機能
