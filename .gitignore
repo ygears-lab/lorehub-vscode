@@ -28,3 +28,6 @@
 !.vscode/launch.json
 !.vscode/tasks.json
 
+# backend infra (schema/config lives in the private parent repo)
+/supabase
+
