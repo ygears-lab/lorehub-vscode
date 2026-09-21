@@ -13,10 +13,13 @@ LoreHub
 ### 主な機能
 - md新規作成
 - 既存のファイルをインポート
-- ラベル作成
+- md を複製
+- お気に入り登録（一覧の先頭に固定表示）
+- ラベル作成（8色から色を選択可能）
 - mdへのラベルを付け
 - プロジェクトへのロード（ダウンロード）
   - 同名の既存ファイルが存在する場合は上書き前にdiff表示
+  - 最終ロード日時を記録し、一覧は「お気に入り → 最終ロード日時」の順に並ぶ
 - クラウド保存で複数環境から管理
 
 ![frontendラベルmd一覧が絞り込まれた画面](https://raw.githubusercontent.com/ygears-lab/lorehub-vscode/main/assets/screenshots/02-label-filter.png)

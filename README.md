@@ -13,10 +13,13 @@ Sign in with GitHub on a new machine and your library is already there, so you n
 ### Main features
 - Create a new md file
 - Import an existing file
-- Create labels
+- Duplicate an md file
+- Mark an md file as a favorite (pinned to the top of the list)
+- Create labels (choose from 8 colors)
 - Attach labels to md files
 - Load (download) an md file into your project
   - If a file with the same name already exists, the diff is shown before it is overwritten
+  - The last-loaded time is recorded, and the list is sorted by favorite, then most recently loaded
 - Cloud storage, so you can manage the same library from several machines
 
 ![The md list filtered by the "frontend" label](https://raw.githubusercontent.com/ygears-lab/lorehub-vscode/main/assets/screenshots/02-label-filter.png)

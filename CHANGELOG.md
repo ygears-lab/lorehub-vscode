@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 (21 September 2026)
+
+- Labels can now have a color, chosen from a fixed 8-color palette that follows the VS Code theme.
+- Mark any md as a favorite; favorites are pinned to the top of the list.
+- Duplicate an md. Favorite status and labels carry over; load history does not.
+- The list now records when each md was last loaded into a project and sorts by favorite, then most recently loaded.
+
 ## 0.1.0 (10 September 2026) PreRelease
 
 Initial release!
