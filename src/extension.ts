@@ -68,7 +68,10 @@ export function activate(context: vscode.ExtensionContext) {
           { title: vscode.l10n.t('LoreHub: Select an md to load'), matchOnDescription: true },
         );
         if (picked) {
-          await loadService.load(picked.record satisfies MdRecord, targetDirectory);
+          const wasLoaded = await loadService.load(picked.record satisfies MdRecord, targetDirectory);
+          if (wasLoaded) {
+            await mdService.recordLoaded(picked.record.id);
+          }
         }
       }),
     ),

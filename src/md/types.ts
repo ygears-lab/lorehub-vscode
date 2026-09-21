@@ -5,6 +5,8 @@ export interface MdRecord {
   content: string;
   createdAt: string;
   updatedAt: string;
+  isFavorite: boolean;
+  lastLoadedAt: string | null;
   labelIds: string[];
 }
 

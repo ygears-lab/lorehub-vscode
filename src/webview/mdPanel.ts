@@ -138,6 +138,30 @@ export class MdPanel {
         }
         return;
       }
+      case 'duplicate': {
+        if (!this.requireAuth(message.requestId)) {return;}
+        try {
+          const source = await this.mdService.get(message.id);
+          const created = await this.mdService.duplicate(source);
+          for (const labelId of source.labelIds) {
+            await this.labelService.assign(created.id, labelId);
+          }
+          this.post({ type: 'mdCreated', record: { ...created, labelIds: source.labelIds } });
+        } catch (err) {
+          this.postError(err, message.requestId);
+        }
+        return;
+      }
+      case 'setFavorite': {
+        if (!this.requireAuth(message.requestId)) {return;}
+        try {
+          const record = await this.mdService.setFavorite(message.id, message.value);
+          this.post({ type: 'mdUpdated', record });
+        } catch (err) {
+          this.postError(err, message.requestId);
+        }
+        return;
+      }
       case 'importLocalFile': {
         if (!this.requireAuth(message.requestId)) {return;}
         const uris = await vscode.window.showOpenDialog({ canSelectMany: false });
@@ -156,7 +180,11 @@ export class MdPanel {
         if (!this.requireAuth(message.requestId)) {return;}
         try {
           const record = await this.mdService.get(message.id);
-          await this.loadService.load(record);
+          const wasLoaded = await this.loadService.load(record);
+          if (wasLoaded) {
+            const updated = await this.mdService.recordLoaded(record.id);
+            this.post({ type: 'mdUpdated', record: updated });
+          }
         } catch (err) {
           this.postError(err, message.requestId);
         }
@@ -165,7 +193,7 @@ export class MdPanel {
       case 'createLabel': {
         if (!this.requireAuth(message.requestId)) {return;}
         try {
-          const label = await this.labelService.create(message.name);
+          const label = await this.labelService.create(message.name, message.color);
           this.post({ type: 'labelCreated', label });
         } catch (err) {
           this.postError(err, message.requestId);
@@ -175,7 +203,7 @@ export class MdPanel {
       case 'renameLabel': {
         if (!this.requireAuth(message.requestId)) {return;}
         try {
-          const label = await this.labelService.rename(message.id, message.name);
+          const label = await this.labelService.rename(message.id, message.name, message.color);
           this.post({ type: 'labelRenamed', label });
         } catch (err) {
           this.postError(err, message.requestId);

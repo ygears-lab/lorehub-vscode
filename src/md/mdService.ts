@@ -4,8 +4,11 @@ import type { AuthService } from '../auth/authService';
 import type { LabelService } from '../label/labelService';
 import { SessionRejectedError, isSessionRejectedMessage } from '../auth/sessionRejection';
 import { MD_CACHE_KEY } from './constants';
+import { nextCopyName } from './duplicateNaming';
 import type { MdListPayload, MdRecord } from './types';
 import { MdNetworkError, MdValidationError, assertWithinSizeLimit, decodeUtf8Strict, isBinaryContent, suggestFilenameFromPath } from './validation';
+
+const MD_COLUMNS = 'id,title,filename,content,created_at,updated_at,is_favorite,last_loaded_at';
 
 interface MdRow {
   id: string;
@@ -14,6 +17,8 @@ interface MdRow {
   content: string;
   created_at: string;
   updated_at: string;
+  is_favorite: boolean;
+  last_loaded_at: string | null;
 }
 
 interface MdCacheEntry {
@@ -29,6 +34,8 @@ function toRecord(row: MdRow, labelIds: string[] = []): MdRecord {
     content: row.content,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    isFavorite: row.is_favorite,
+    lastLoadedAt: row.last_loaded_at,
     labelIds,
   };
 }
@@ -67,14 +74,15 @@ export class MdService {
       }
     }
 
-    let query = this.supabase
-      .from('md')
-      .select('id,title,filename,content,created_at,updated_at')
-      .is('deleted_at', null);
+    let query = this.supabase.from('md').select(MD_COLUMNS).is('deleted_at', null);
     if (filterMdIds) {
       query = query.in('id', filterMdIds);
     }
-    const { data, error } = await query.order('updated_at', { ascending: false });
+    // お気に入り→最終ロード日時の2段階ソート（docs/requirements.md §11）。
+    // webview側でも再ソートするが、キャッシュ表示時のチラつきを避けるため取得順を合わせておく。
+    const { data, error } = await query
+      .order('is_favorite', { ascending: false })
+      .order('last_loaded_at', { ascending: false, nullsFirst: false });
 
     if (error) {
       // 絞り込み中はキャッシュ(全件のみ保持)にフォールバックすると結果が過剰になるため、そのまま失敗させる。
@@ -97,7 +105,7 @@ export class MdService {
   async get(id: string): Promise<MdRecord> {
     const { data, error } = await this.supabase
       .from('md')
-      .select('id,title,filename,content,created_at,updated_at')
+      .select(MD_COLUMNS)
       .eq('id', id)
       .is('deleted_at', null)
       .maybeSingle();
@@ -149,6 +157,55 @@ export class MdService {
     if (error) {
       throw toServiceError(error.message);
     }
+  }
+
+  async setFavorite(id: string, value: boolean): Promise<MdRecord> {
+    const { data, error } = await this.supabase
+      .from('md')
+      .update({ is_favorite: value })
+      .eq('id', id)
+      .select(MD_COLUMNS)
+      .single();
+    if (error || !data) {
+      throw toServiceError(error?.message ?? vscode.l10n.t('Failed to update the md'));
+    }
+    const labelMap = await this.labelService.listLabelIdsForMdIds([id]);
+    return toRecord(data as MdRow, labelMap.get(id) ?? []);
+  }
+
+  /** ロードが実際にファイルへ書き込まれたときだけ呼ぶ（キャンセル時は呼ばない）。 */
+  async recordLoaded(id: string): Promise<MdRecord> {
+    const { data, error } = await this.supabase
+      .from('md')
+      .update({ last_loaded_at: new Date().toISOString() })
+      .eq('id', id)
+      .select(MD_COLUMNS)
+      .single();
+    if (error || !data) {
+      throw toServiceError(error?.message ?? vscode.l10n.t('Failed to update the md'));
+    }
+    const labelMap = await this.labelService.listLabelIdsForMdIds([id]);
+    return toRecord(data as MdRow, labelMap.get(id) ?? []);
+  }
+
+  /**
+   * 複製先の title/filename は VSCodeエクスプローラーのコピー命名規則
+   * （xxxx.md → xxxx.copy.md → xxxx.copy 2.md ...）に倣う。お気に入り状態は引き継ぎ、
+   * 最終ロード日時は引き継がない（複製は新規作成扱いのため常に未ロード）。
+   * ラベルの引き継ぎは呼び出し側（MdPanel）がlabelServiceで行う。
+   */
+  async duplicate(source: MdRecord): Promise<MdRecord> {
+    const { records: siblings } = await this.list();
+    const filename = nextCopyName(
+      source.filename,
+      siblings.map((record) => record.filename),
+    );
+    const title = nextCopyName(
+      source.title,
+      siblings.map((record) => record.title),
+    );
+    const created = await this.create({ title, filename, content: source.content });
+    return source.isFavorite ? this.setFavorite(created.id, true) : created;
   }
 
   async importFromFile(uri: vscode.Uri): Promise<MdRecord> {

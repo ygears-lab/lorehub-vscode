@@ -251,6 +251,27 @@ textarea:focus {
   min-width: 0;
 }
 
+.label-nav-row-input {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* リネーム編集中は入力行とカラースウォッチ行を縦に積む。 */
+.label-nav-row.editing {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.label-nav-color-dot {
+  flex: none;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
 .filter-status {
   flex: none;
   display: flex;
@@ -272,6 +293,63 @@ textarea:focus {
   gap: 2px;
   padding: 4px;
   border-top: 1px solid var(--vscode-panel-border);
+}
+
+/* 新規ラベル作成フォームが開いているときは、入力行・カラースウォッチ行・ボタン行を縦に積む。 */
+.label-nav-footer-open {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.label-nav-footer-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+/* --- ラベルのカラースウォッチ（作成・リネーム共通） ---------------------- */
+
+.color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.color-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 50%;
+  background-color: var(--vscode-badge-background);
+}
+
+.color-swatch.selected {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* 「色なし」は円の中に斜線を引いて、選択可能な1オプションであることを示す。 */
+.color-swatch-none {
+  position: relative;
+}
+
+.color-swatch-none::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    to top right,
+    transparent 46%,
+    var(--vscode-descriptionForeground) 48%,
+    var(--vscode-descriptionForeground) 52%,
+    transparent 54%
+  );
 }
 
 .icon-button {
@@ -338,9 +416,17 @@ textarea:focus {
 
 .md-list-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.md-list-title-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
 }
 
 .md-list-title {
@@ -348,6 +434,30 @@ textarea:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* お気に入りトグル。一覧行のクリック(選択)とは独立して押せるよう、行クリックとは別に
+ * stopPropagation() で処理する(main.ts側)。 */
+.md-list-favorite {
+  flex: none;
+  padding: 0 2px;
+  line-height: 1;
+  color: var(--vscode-descriptionForeground);
+  background-color: transparent;
+}
+
+.md-list-favorite:hover:not(:disabled) {
+  background-color: transparent;
+  opacity: 0.8;
+}
+
+.md-list-favorite.active {
+  color: var(--vscode-charts-yellow, gold);
+}
+
+.md-list li.selected .md-list-favorite:not(.active) {
+  color: inherit;
+  opacity: 0.8;
 }
 
 .md-list-time {
@@ -438,6 +548,34 @@ textarea:focus {
   line-height: 1.4;
   background-color: var(--vscode-badge-background);
   color: var(--vscode-badge-foreground);
+}
+
+/* ラベルの8色固定パレット（docs/2026-09-06-122851_UiUxDirection.md §8.4）。
+ * VSCodeのチャート系テーマカラーを動的参照するので、テーマ変更に自動追従する。
+ * .label-chip より後ろに置き、同じ詳細度でも背景色がこちらで上書きされるようにする。 */
+.lh-color-red {
+  background-color: var(--vscode-charts-red);
+}
+.lh-color-blue {
+  background-color: var(--vscode-charts-blue);
+}
+.lh-color-yellow {
+  background-color: var(--vscode-charts-yellow);
+}
+.lh-color-orange {
+  background-color: var(--vscode-charts-orange);
+}
+.lh-color-green {
+  background-color: var(--vscode-charts-green);
+}
+.lh-color-purple {
+  background-color: var(--vscode-charts-purple);
+}
+.lh-color-foreground {
+  background-color: var(--vscode-charts-foreground);
+}
+.lh-color-lines {
+  background-color: var(--vscode-charts-lines);
 }
 
 /* --- エディタ側のラベル付与UI ---------------------------------------------

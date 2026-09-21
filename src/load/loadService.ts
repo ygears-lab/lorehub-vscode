@@ -12,16 +12,20 @@ export class LoadService {
    * 要件どおり、ロードのたびに配置先をユーザーに選ばせる（固定パスへの自動配置はしない）。
    * targetDirectory は「エクスプローラでフォルダを右クリックした」ようにユーザーが既に
    * 配置先を指したケース用で、その時だけディレクトリ選択ダイアログを省く。
+   *
+   * 戻り値は「最終ロード日時」を記録すべきかを呼び出し側が判断するためのもの:
+   * ディレクトリ/ファイル名の選択をキャンセルした場合や上書きを拒否した場合は false、
+   * 実際に書き込んだ場合・既に最新で書き込み不要だった場合は true。
    */
-  async load(record: MdRecord, targetDirectory?: vscode.Uri): Promise<void> {
+  async load(record: MdRecord, targetDirectory?: vscode.Uri): Promise<boolean> {
     const directory = targetDirectory ?? (await this.pickDirectory());
     if (!directory) {
-      return;
+      return false;
     }
 
     const filename = await this.pickFilename(record);
     if (!filename) {
-      return;
+      return false;
     }
 
     const targetUri = vscode.Uri.joinPath(directory, filename);
@@ -31,10 +35,10 @@ export class LoadService {
     if (existing) {
       if (Buffer.from(existing).equals(content)) {
         void vscode.window.showInformationMessage(vscode.l10n.t('LoreHub: "{0}" is already up to date', filename));
-        return;
+        return true;
       }
       if (!(await this.confirmOverwrite(record, filename, targetUri))) {
-        return;
+        return false;
       }
     }
 
@@ -48,6 +52,7 @@ export class LoadService {
     if (choice === open) {
       await vscode.window.showTextDocument(targetUri);
     }
+    return true;
   }
 
   private async pickDirectory(): Promise<vscode.Uri | undefined> {

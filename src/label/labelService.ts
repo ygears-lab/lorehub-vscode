@@ -9,6 +9,7 @@ import { LabelNetworkError, LabelValidationError, assertNonBlankName } from './v
 interface LabelRow {
   id: string;
   name: string;
+  color: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -24,6 +25,7 @@ function toRecord(row: LabelRow): LabelRecord {
   return {
     id: row.id,
     name: row.name,
+    color: row.color,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -53,7 +55,7 @@ export class LabelService {
   async list(): Promise<LabelRecord[]> {
     const { data, error } = await this.supabase
       .from('labels')
-      .select('id,name,created_at,updated_at')
+      .select('id,name,color,created_at,updated_at')
       .order('name', { ascending: true });
 
     if (error) {
@@ -68,20 +70,24 @@ export class LabelService {
     return labels;
   }
 
-  async create(name: string): Promise<LabelRecord> {
+  async create(name: string, color?: string | null): Promise<LabelRecord> {
     const trimmed = assertNonBlankName(name);
-    const { data, error } = await this.supabase.from('labels').insert({ name: trimmed }).select().single();
+    const { data, error } = await this.supabase
+      .from('labels')
+      .insert({ name: trimmed, color: color ?? null })
+      .select()
+      .single();
     if (error || !data) {
       throw this.toCreateError(error, trimmed);
     }
     return toRecord(data as LabelRow);
   }
 
-  async rename(id: string, name: string): Promise<LabelRecord> {
+  async rename(id: string, name: string, color?: string | null): Promise<LabelRecord> {
     const trimmed = assertNonBlankName(name);
     const { data, error } = await this.supabase
       .from('labels')
-      .update({ name: trimmed })
+      .update({ name: trimmed, ...(color === undefined ? {} : { color }) })
       .eq('id', id)
       .select()
       .single();

@@ -26,11 +26,13 @@ export type WebviewToHostMessage =
   | { type: 'create'; requestId: string; title: string; filename: string; content: string }
   | { type: 'update'; requestId: string; id: string; title?: string; filename?: string; content?: string }
   | { type: 'delete'; requestId: string; id: string; title: string }
+  | { type: 'duplicate'; requestId: string; id: string }
+  | { type: 'setFavorite'; requestId: string; id: string; value: boolean }
   | { type: 'importLocalFile'; requestId: string }
   | { type: 'loadToProject'; requestId: string; id: string }
   | { type: 'requestLabels' }
-  | { type: 'createLabel'; requestId: string; name: string }
-  | { type: 'renameLabel'; requestId: string; id: string; name: string }
+  | { type: 'createLabel'; requestId: string; name: string; color?: string | null }
+  | { type: 'renameLabel'; requestId: string; id: string; name: string; color?: string | null }
   | { type: 'deleteLabel'; requestId: string; id: string; name: string }
   | { type: 'assignLabel'; requestId: string; mdId: string; labelId: string }
   | { type: 'unassignLabel'; requestId: string; mdId: string; labelId: string }

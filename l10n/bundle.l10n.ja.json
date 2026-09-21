@@ -90,5 +90,12 @@
   "● Unsaved changes": "● 未保存の変更があります",
   "Save": "保存",
   "Save (Ctrl/Cmd+S)": "保存 (Ctrl/Cmd+S)",
-  "Load into Project": "プロジェクトにロード"
+  "Load into Project": "プロジェクトにロード",
+  "Duplicate": "複製",
+  "Duplicate this md": "この md を複製",
+  "Add to favorites": "お気に入りに追加",
+  "Remove from favorites": "お気に入りから外す",
+  "Not loaded yet": "未ロード",
+  "No color": "色なし",
+  "Color {0}": "色 {0}"
 }

@@ -1,4 +1,5 @@
 import type { HostToWebviewMessage, WebviewToHostMessage } from './protocol';
+import { LABEL_COLORS, isLabelColor, type LabelColor } from '../label/colors';
 import type { LabelRecord } from '../label/types';
 import type { MdListPayload, MdRecord } from '../md/types';
 import { compareNames, initL10n, relativeTime, t, type L10nPayload } from './l10n';
@@ -23,8 +24,10 @@ let labels: LabelRecord[] = [];
 let activeLabelFilter = new Set<string>();
 let searchQuery = '';
 let newLabelDraft = '';
+let newLabelColor: LabelColor | null = null;
 let renamingLabelId: string | null = null;
 let renameDraft = '';
+let renameColorDraft: LabelColor | null = null;
 let labelAdderOpen = false;
 let labelPickerOpen = false;
 let labelPickerQuery = '';
@@ -174,12 +177,47 @@ function renderToolbar(): HTMLElement {
   return toolbar;
 }
 
-function labelName(id: string): string {
-  return labels.find((label) => label.id === id)?.name ?? '';
-}
-
 function labelCount(id: string): number {
   return records.reduce((count, record) => (record.labelIds.includes(id) ? count + 1 : count), 0);
+}
+
+/** ラベル色は8色固定パレットのCSSクラス(main.css の .lh-color-*)にそのまま対応させる。 */
+function applyLabelColorClass(el: HTMLElement, color: string | null | undefined): void {
+  if (isLabelColor(color)) {
+    el.classList.add(`lh-color-${color}`);
+  }
+}
+
+/** ラベル作成/リネームフォーム共通の8色スウォッチ（＋「色なし」）。 */
+function renderColorSwatches(selected: LabelColor | null, onSelect: (color: LabelColor | null) => void): HTMLElement {
+  const row = document.createElement('div');
+  row.className = 'color-swatches';
+
+  const none = document.createElement('button');
+  none.type = 'button';
+  none.className = 'color-swatch color-swatch-none';
+  none.title = t('No color');
+  none.setAttribute('aria-pressed', String(selected === null));
+  if (selected === null) {
+    none.classList.add('selected');
+  }
+  none.addEventListener('click', () => onSelect(null));
+  row.appendChild(none);
+
+  LABEL_COLORS.forEach((color, index) => {
+    const swatch = document.createElement('button');
+    swatch.type = 'button';
+    swatch.className = `color-swatch lh-color-${color}`;
+    swatch.title = t('Color {0}', index + 1);
+    swatch.setAttribute('aria-pressed', String(selected === color));
+    if (selected === color) {
+      swatch.classList.add('selected');
+    }
+    swatch.addEventListener('click', () => onSelect(color));
+    row.appendChild(swatch);
+  });
+
+  return row;
 }
 
 // ---------------------------------------------------------------------------
@@ -318,7 +356,14 @@ function renderLabelNavRow(label: LabelRecord): HTMLElement {
   count.className = 'label-nav-count';
   count.textContent = String(labelCount(label.id));
 
-  item.append(renderCheckMark(active), name, count);
+  const parts = [renderCheckMark(active)];
+  if (isLabelColor(label.color)) {
+    const dot = document.createElement('span');
+    dot.className = 'label-nav-color-dot';
+    applyLabelColorClass(dot, label.color);
+    parts.push(dot);
+  }
+  item.append(...parts, name, count);
 
   const actions = document.createElement('div');
   actions.className = 'label-nav-actions';
@@ -331,6 +376,7 @@ function renderLabelNavRow(label: LabelRecord): HTMLElement {
   rename.addEventListener('click', () => {
     renamingLabelId = label.id;
     renameDraft = label.name;
+    renameColorDraft = isLabelColor(label.color) ? label.color : null;
     pendingFocusKey = 'label-rename';
     render();
   });
@@ -363,7 +409,7 @@ function renderLabelRenameRow(label: LabelRecord): HTMLElement {
   });
 
   const commit = (): void => {
-    post({ type: 'renameLabel', requestId: newRequestId(), id: label.id, name: input.value });
+    post({ type: 'renameLabel', requestId: newRequestId(), id: label.id, name: input.value, color: renameColorDraft });
   };
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -388,7 +434,18 @@ function renderLabelRenameRow(label: LabelRecord): HTMLElement {
     render();
   });
 
-  row.append(input, confirm, cancel);
+  const inputRow = document.createElement('div');
+  inputRow.className = 'label-nav-row-input';
+  inputRow.append(input, confirm, cancel);
+
+  row.append(
+    inputRow,
+    renderColorSwatches(renameColorDraft, (color) => {
+      renameColorDraft = color;
+      pendingFocusKey = 'label-rename';
+      render();
+    }),
+  );
   return row;
 }
 
@@ -403,6 +460,7 @@ function renderLabelAdder(): HTMLElement {
     open.disabled = offline;
     open.addEventListener('click', () => {
       labelAdderOpen = true;
+      newLabelColor = null;
       pendingFocusKey = 'label-add';
       render();
     });
@@ -424,7 +482,7 @@ function renderLabelAdder(): HTMLElement {
     if (!input.value.trim()) {
       return;
     }
-    post({ type: 'createLabel', requestId: newRequestId(), name: input.value });
+    post({ type: 'createLabel', requestId: newRequestId(), name: input.value, color: newLabelColor });
   };
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -447,10 +505,24 @@ function renderLabelAdder(): HTMLElement {
   cancel.addEventListener('click', () => {
     labelAdderOpen = false;
     newLabelDraft = '';
+    newLabelColor = null;
     render();
   });
 
-  footer.append(input, add, cancel);
+  const buttons = document.createElement('div');
+  buttons.className = 'label-nav-footer-buttons';
+  buttons.append(add, cancel);
+
+  footer.classList.add('label-nav-footer-open');
+  footer.append(
+    input,
+    renderColorSwatches(newLabelColor, (color) => {
+      newLabelColor = color;
+      pendingFocusKey = 'label-add';
+      render();
+    }),
+    buttons,
+  );
   return footer;
 }
 
@@ -471,7 +543,12 @@ function visibleRecords(): MdRecord[] {
       }
       return true;
     })
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    .sort((a, b) => {
+      if (a.isFavorite !== b.isFavorite) {
+        return a.isFavorite ? -1 : 1;
+      }
+      return (b.lastLoadedAt ?? '').localeCompare(a.lastLoadedAt ?? '');
+    });
 }
 
 /** ISO日時を「3日前」のような相対表示にする。一覧の1行に収める前提で粒度は粗くてよい。
@@ -557,28 +634,44 @@ function renderList(): HTMLElement {
     const head = document.createElement('div');
     head.className = 'md-list-head';
 
+    const favorite = document.createElement('button');
+    favorite.type = 'button';
+    favorite.className = record.isFavorite ? 'md-list-favorite active' : 'md-list-favorite';
+    favorite.textContent = record.isFavorite ? '★' : '☆';
+    favorite.title = record.isFavorite ? t('Remove from favorites') : t('Add to favorites');
+    favorite.disabled = offline;
+    favorite.addEventListener('click', (event) => {
+      event.stopPropagation();
+      post({ type: 'setFavorite', requestId: newRequestId(), id: record.id, value: !record.isFavorite });
+    });
+
+    const titleGroup = document.createElement('span');
+    titleGroup.className = 'md-list-title-group';
+
     const title = document.createElement('span');
     title.className = 'md-list-title';
     title.textContent = record.title || record.filename || t('(untitled)');
+    titleGroup.append(favorite, title);
 
     const time = document.createElement('span');
     time.className = 'md-list-time';
-    time.textContent = formatRelativeTime(record.updatedAt);
+    time.textContent = record.lastLoadedAt ? formatRelativeTime(record.lastLoadedAt) : t('Not loaded yet');
 
-    head.append(title, time);
+    head.append(titleGroup, time);
     item.appendChild(head);
 
     if (record.labelIds.length > 0) {
       const chips = document.createElement('div');
       chips.className = 'md-list-chips';
       for (const labelId of record.labelIds) {
-        const name = labelName(labelId);
-        if (!name) {
+        const label = labels.find((l) => l.id === labelId);
+        if (!label) {
           continue;
         }
         const chip = document.createElement('span');
         chip.className = 'label-chip';
-        chip.textContent = name;
+        applyLabelColorClass(chip, label.color);
+        chip.textContent = label.name;
         chips.appendChild(chip);
       }
       item.appendChild(chips);
@@ -780,6 +873,7 @@ function renderLabelPicker(record: MdRecord): HTMLElement {
   for (const label of assigned) {
     const chip = document.createElement('span');
     chip.className = 'label-chip label-chip-assigned';
+    applyLabelColorClass(chip, label.color);
     chip.append(label.name);
 
     const remove = document.createElement('button');
@@ -873,7 +967,13 @@ function renderLabelPopover(record: MdRecord): HTMLElement {
 
     const name = document.createElement('span');
     name.className = 'label-option-name';
-    name.textContent = label.name;
+    if (isLabelColor(label.color)) {
+      const dot = document.createElement('span');
+      dot.className = 'label-nav-color-dot';
+      applyLabelColorClass(dot, label.color);
+      name.appendChild(dot);
+    }
+    name.append(label.name);
 
     const count = document.createElement('span');
     count.className = 'label-option-count';
@@ -946,6 +1046,14 @@ function renderActions(): HTMLElement {
     loadButton.disabled = dirty;
     loadButton.addEventListener('click', () => post({ type: 'loadToProject', requestId: newRequestId(), id }));
     actions.appendChild(loadButton);
+
+    const duplicateButton = document.createElement('button');
+    duplicateButton.className = 'secondary-button';
+    duplicateButton.textContent = t('Duplicate');
+    duplicateButton.title = t('Duplicate this md');
+    duplicateButton.disabled = offline;
+    duplicateButton.addEventListener('click', () => post({ type: 'duplicate', requestId: newRequestId(), id }));
+    actions.appendChild(duplicateButton);
 
     const deleteButton = document.createElement('button');
     deleteButton.className = 'secondary-button';
@@ -1033,7 +1141,9 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
     }
     if (renamingLabelId !== null || labelAdderOpen) {
       renamingLabelId = null;
+      renameColorDraft = null;
       labelAdderOpen = false;
+      newLabelColor = null;
       event.preventDefault();
       render();
       return;
@@ -1110,7 +1220,9 @@ window.addEventListener('message', (event: MessageEvent<HostToWebviewMessage>) =
         activeLabelFilter = new Set();
         searchQuery = '';
         renamingLabelId = null;
+        renameColorDraft = null;
         labelAdderOpen = false;
+        newLabelColor = null;
         resetLabelPicker();
       }
       render();
@@ -1155,6 +1267,7 @@ window.addEventListener('message', (event: MessageEvent<HostToWebviewMessage>) =
       errorMessage = null;
       labels = [...labels, message.label].sort((a, b) => compareNames(a.name, b.name));
       newLabelDraft = '';
+      newLabelColor = null;
       if (pendingAssignMdId) {
         // エディタのポップオーバーから作った場合は、作成に続けて付与まで済ませる。
         post({ type: 'assignLabel', requestId: newRequestId(), mdId: pendingAssignMdId, labelId: message.label.id });
@@ -1174,6 +1287,7 @@ window.addEventListener('message', (event: MessageEvent<HostToWebviewMessage>) =
         .map((label) => (label.id === message.label.id ? message.label : label))
         .sort((a, b) => compareNames(a.name, b.name));
       renamingLabelId = null;
+      renameColorDraft = null;
       render();
       return;
     case 'labelDeleted':
